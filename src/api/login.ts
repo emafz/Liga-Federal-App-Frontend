@@ -1,4 +1,4 @@
-import { API_URL } from '@/config/globals'
+import { API_URL } from "@/config/globals";
 
 // ------------------------------------------------------------
 // POST /auth/login → devuelve { token, role }
@@ -6,19 +6,19 @@ import { API_URL } from '@/config/globals'
 export async function login(email: string, password: string) {
   // 1. Hacemos la petición POST con email y password en el body
   const response = await fetch(`${API_URL}/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
-  })
+  });
 
   // 2. Convertimos la respuesta a JSON
-  const body = await response.json()
+  const body = await response.json();
 
   // 3. Si el backend respondió con error, lanzamos su mensaje
   if (!body.success) {
-    throw new Error(body.message) // ej: "Password incorrecto"
+    throw new Error(body.message); // ej: "Password incorrecto"
   }
 
   // 4. Devolvemos solo la data: { token, role }
-  return body.data
+  return body.data;
 }

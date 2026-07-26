@@ -1,6 +1,6 @@
-import Navigation from '@/components/blocks/Navigation/Navigation'
+import Navigation from "@/components/blocks/Navigation/Navigation";
 
-import styles from './Register.module.css'
+import styles from "./Register.module.css";
 
 function Register() {
   return (
@@ -8,7 +8,7 @@ function Register() {
       <Navigation />
       <h1>Hello Register</h1>
     </main>
-  )
+  );
 }
 
-export default Register
+export default Register;

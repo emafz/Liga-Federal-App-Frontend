@@ -1,6 +1,6 @@
-import { Link } from '@tanstack/react-router'
+import { Link } from "@tanstack/react-router";
 
-import styles from './Navigation.module.css'
+import styles from "./Navigation.module.css";
 
 function Navigation() {
   return (
@@ -9,7 +9,7 @@ function Navigation() {
       <Link to="/login">Login</Link>
       <Link to="/create-user">Crear Usuario</Link>
     </nav>
-  )
+  );
 }
 
-export default Navigation
+export default Navigation;

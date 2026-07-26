@@ -1,5 +1,5 @@
-import { API_URL } from '@/config/globals'
-import type { User } from '@/api/types'
+import { API_URL } from "@/config/globals";
+import type { User } from "@/api/types";
 
 // ------------------------------------------------------------
 // GET /users → devuelve la lista de usuarios
@@ -7,20 +7,20 @@ import type { User } from '@/api/types'
 // ------------------------------------------------------------
 export async function getUsers(): Promise<User[]> {
   // El token guardado en el login prueba quiénes somos
-  const token = localStorage.getItem('token')
+  const token = localStorage.getItem("token");
 
   const response = await fetch(`${API_URL}/users`, {
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-  })
+  });
 
-  const body = await response.json()
+  const body = await response.json();
 
   if (!body.success) {
-    throw new Error(body.message) // ej: "Acceso denegado", "Token inválido"
+    throw new Error(body.message); // ej: "Acceso denegado", "Token inválido"
   }
 
-  return body.data
+  return body.data;
 }

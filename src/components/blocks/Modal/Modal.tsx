@@ -1,27 +1,27 @@
-import { useEffect } from 'react'
-import styles from './Modal.module.css'
+import { useEffect } from "react";
+import styles from "./Modal.module.css";
 
 interface ModalProps {
-  isOpen: boolean
-  onClose: () => void
-  title?: string
-  children: React.ReactNode
+  isOpen: boolean;
+  onClose: () => void;
+  title?: string;
+  children: React.ReactNode;
 }
 
 function Modal({ isOpen, onClose, title, children }: ModalProps) {
   // Cerrar con Escape mientras el modal está abierto
   useEffect(() => {
-    if (!isOpen) return
+    if (!isOpen) return;
 
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose()
+      if (e.key === "Escape") onClose();
     }
 
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, onClose])
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -35,7 +35,7 @@ function Modal({ isOpen, onClose, title, children }: ModalProps) {
         <div className={styles.body}>{children}</div>
       </div>
     </div>
-  )
+  );
 }
 
-export default Modal
+export default Modal;
