@@ -1,100 +1,299 @@
 .container {
   display: flex;
-  height: 100vh;
+  min-height: 100vh;
+  width: 100%;
 }
 
-/* ============================================================
-                  LADO IZQUIERDO
-        ============================================================ */
 .left {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #0a0a0a;
-  padding: 40px;
+  padding: 40px 45px;
+  background-color: rgba(2, 7, 18, 0.4);
+  flex-wrap: wrap;
+  align-content: flex-start;
 }
 
-.form {
+.contentWrapper {
   width: 100%;
-  max-width: 360px;
+  max-width: 580px;
   display: flex;
   flex-direction: column;
+  gap: 10px;
+}
+
+.logoHeader {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.logo {
+  max-height: 100px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(0, 102, 255, 0.3));
+  cursor: pointer;
+}
+
+.registerCard {
+  background: var(--color-card-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: 20px 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.registerCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-primary), #00d2ff, var(--color-primary));
 }
 
 .title {
-  font-size: 28px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 800;
   color: #ffffff;
-  margin: 0 0 8px;
+  margin: 0 0 4px 0;
+  letter-spacing: -0.02em;
 }
 
 .subtitle {
-  font-size: 14px;
-  color: #888;
-  margin: 0 0 32px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+  margin: 0 0 12px 0;
 }
 
-.label {
-  font-size: 13px;
-  font-weight: 500;
-  color: #ccc;
-  margin-bottom: 6px;
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.input {
-  width: 100%;
-  padding: 12px 16px;
-  margin-bottom: 20px;
-  background-color: #1a1a1a;
-  border: 1px solid #333;
-  border-radius: 8px;
-  color: #fff;
-  font-size: 15px;
-  box-sizing: border-box;
-  outline: none;
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
 }
 
-.input:focus {
-  border-color: #666;
+.fullWidth {
+  grid-column: 1 / -1;
 }
 
-/* Mensaje de error de la API */
-.error {
-  font-size: 14px;
-  color: #ff6b6b;
-  margin: 0 0 16px;
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.footer {
-  margin-top: 24px;
-  font-size: 14px;
-  color: #888;
-  text-align: center;
+.inputGroupInline {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
-.footer a {
-  color: #fff;
-  text-decoration: none;
+.labelInline {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
-.footer a:hover {
-  text-decoration: underline;
-}
-
-/* ============================================================
-                  LADO DERECHO
-      ============================================================ */
-.right {
+.inlineInputWrapper {
   flex: 1;
-  background-color: #e8e8e8;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-/* ============================================================
-                  MOBILE
-    ============================================================ */
-@media (max-width: 768px) {
+.input,
+.select {
+  width: 100%;
+  padding: 8px 14px;
+  background: rgba(2, 8, 18, 0.85);
+  border: 1px solid rgba(0, 102, 255, 0.25);
+  border-radius: var(--radius-md);
+  color: #ffffff;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.input::placeholder {
+  color: #4b6282;
+}
+
+.select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 14px;
+  padding-right: 40px;
+}
+
+.select option {
+  background: #051124;
+  color: #ffffff;
+}
+
+.input:focus,
+.select:focus {
+  border-color: var(--color-primary);
+  border-width: 2px;
+}
+
+.inputError {
+  border-color: #ff5252 !important;
+}
+
+.fieldError {
+  font-size: 11px;
+  color: #ff5252;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.error {
+  font-size: 13px;
+  color: #ff5252;
+  margin: 0;
+}
+
+.buttonWrapper {
+  margin-top: 4px;
+}
+
+.buttonWrapper button {
+  background: linear-gradient(135deg, var(--color-accent-gold) 0%, #a68128 100%);
+  color: #020712;
+  border: none;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  transition: transform 0.15s, opacity 0.15s;
+}
+
+.buttonWrapper button:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.btnContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.loginPrompt {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.loginLink {
+  color: var(--color-primary);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  transition: color 0.15s;
+}
+
+.loginLink:hover {
+  color: #599cff;
+}
+
+.right {
+  flex: 0.9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(2, 7, 18, 0.2);
+  position: relative;
+  overflow: hidden;
+  border-left: 1px solid rgba(0, 102, 255, 0.1);
+}
+
+.right::before {
+  content: "";
+  position: absolute;
+  width: 450px;
+  height: 450px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 102, 255, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
+  pointer-events: none;
+}
+
+.characterContainer {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.characterImage {
+  max-height: 90vh;
+  max-width: 90%;
+  object-fit: contain;
+  filter: drop-shadow(0 5px 25px rgba(0, 102, 255, 0.45));
+  animation: floatCharacter 6s ease-in-out infinite;
+}
+
+@keyframes floatCharacter {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+@media (max-width: 900px) {
   .right {
     display: none;
+  }
+
+  .left {
+    padding: 24px 16px;
+  }
+
+  .contentWrapper {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .formGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .fullWidth {
+    grid-column: 1;
+  }
+
+  .left {
+    padding: 20px 12px;
+  }
+
+  .registerCard {
+    padding: 24px 20px;
+  }
+
+  .title {
+    font-size: 22px;
   }
 }

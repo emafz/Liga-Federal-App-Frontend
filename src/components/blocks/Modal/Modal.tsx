@@ -26,12 +26,14 @@ function Modal({ isOpen, onClose, title, children }: ModalProps) {
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.header}>
-          {title && <h2 className={styles.title}>{title}</h2>}
-          <button className={styles.closeBtn} onClick={onClose} aria-label="Cerrar" type="button">
-            ×
-          </button>
-        </div>
+        <button className={styles.closeBtn} onClick={onClose} aria-label="Cerrar" type="button">
+          ×
+        </button>
+        {title && (
+          <div className={styles.header}>
+            <h2 className={styles.title}>{title}</h2>
+          </div>
+        )}
         <div className={styles.body}>{children}</div>
       </div>
     </div>
