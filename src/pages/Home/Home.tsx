@@ -6,12 +6,15 @@ import styles from "./Home.module.css";
 import { getUsers } from "@/api/getUsers";
 import { updateUser } from "@/api/updateUser";
 import type { User } from "@/api/types";
+import logoImg from "@/assets/Portadas/Logo.webp";
+import personajesImg from "@/assets/Portadas/Personajes-Home.webp";
 
 const ROLES = ["ROOT", "ADMIN", "USER", "GUEST"];
 
 function Home() {
   const navigate = useNavigate();
 
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,31 +24,32 @@ function Home() {
   const [modalMode, setModalMode] = useState<"view" | "edit" | null>(null);
 
   useEffect(() => {
-    // Protección mínima de ruta: sin token no tiene sentido estar acá
-    if (!localStorage.getItem("token")) {
-      navigate({ to: "/login" });
+    const token = localStorage.getItem("token");
+    setIsAuthenticated(!!token);
+    
+    if (!token) {
+      setLoading(false);
       return;
     }
-    // Pedimos los usuarios a la API al montar el componente
+
     async function loadUsers() {
       try {
         const data = await getUsers();
         setUsers(data);
-      } catch (error: any) {
-        setError(error.message);
+      } catch (err: any) {
+        setError(err.message);
       } finally {
         setLoading(false);
       }
     }
 
     loadUsers();
-  }, [navigate]);
+  }, []);
 
   function handleLogout() {
-    // Cerrar sesión = borrar el token y volver al login
     localStorage.removeItem("token");
     localStorage.removeItem("role");
-    navigate({ to: "/login" });
+    setIsAuthenticated(false);
   }
 
   function openView(user: User) {
@@ -68,21 +72,63 @@ function Home() {
     closeModal();
   }
 
+  // Si no está autenticado, mostramos la Landing Page pública
+  if (!isAuthenticated) {
+    return (
+      <div className={styles.landingContainer}>
+        <main className={styles.heroSection}>
+          <section className={styles.heroLeft}>
+            <div className={styles.heroLogoWrapper}>
+              <img src={logoImg} className={styles.heroLogo} alt="Liga Federal Logo" />
+            </div>
+
+            <div className={styles.heroTagline}>
+              <span>UNIDOS POR LO QUE SOMOS,</span>
+              <span>IMPARABLES POR LO QUE PODEMOS SER.</span>
+            </div>
+            
+            <div className={styles.heroActions}>
+              <div className={styles.btnWrapperBlue}>
+                <Button variant="secondary" onClick={() => navigate({ to: "/login" })}>
+                  ACCESO A LA BASE
+                </Button>
+              </div>
+              <div className={styles.btnWrapperGold}>
+                <Button variant="primary" onClick={() => navigate({ to: "/register" })}>
+                  CREAR CUENTA
+                </Button>
+              </div>
+            </div>
+          </section>
+
+          <section className={styles.heroRight}>
+            <div className={styles.charactersWrapper}>
+              <img src={personajesImg} className={styles.charactersImg} alt="Personajes de la Liga Federal" />
+            </div>
+          </section>
+        </main>
+      </div>
+    );
+  }
+
+  // Si está autenticado, mostramos el Panel de Administración de Usuarios
   return (
     <main className={styles.container}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Usuarios</h1>
+        <div className={styles.headerTitleGroup}>
+          <img src={logoImg} className={styles.dashboardLogo} alt="Logo" />
+          <h1 className={styles.title}>Usuarios Registrados</h1>
+        </div>
         <div className={styles.headerActions}>
           <Button variant="primary" onClick={() => navigate({ to: "/create-user" })}>
-            + Agregar
+            + Agregar Usuario
           </Button>
           <Button variant="secondary" onClick={handleLogout}>
-            Cerrar sesión
+            Cerrar Sesión
           </Button>
         </div>
       </div>
 
-      {/* Estados de la petición: cargando → error → vacío → tabla */}
       {loading && <p className={styles.message}>Cargando usuarios...</p>}
 
       {error && <p className={styles.error}>{error}</p>}
@@ -107,8 +153,7 @@ function Home() {
                 <tr key={user._id} className={styles.tr}>
                   <td className={styles.td}>
                     <div className={styles.userCell}>
-                      {/* La API no devuelve imagen: generamos un avatar con el nombre */}
-                      <img className={styles.avatar} src={`https://ui-avatars.com/api/?name=${user.nombre}+${user.apellido}&background=random`} alt={`${user.nombre} ${user.apellido}`} />
+                      <img className={styles.avatar} src={`https://ui-avatars.com/api/?name=${user.nombre}+${user.apellido}&background=0d2847&color=ffffff`} alt={`${user.nombre} ${user.apellido}`} />
                       <span>
                         {user.nombre} {user.apellido}
                       </span>
@@ -178,7 +223,6 @@ function UserDetails({ user }: { user: User }) {
 
 // ------------------------------------------------------------
 // Vista "Editar": formulario que guarda cambios con updateUser
-// El email no se incluye: el backend no permite modificarlo
 // ------------------------------------------------------------
 function UserEditForm({ user, onCancel, onSaved }: { user: User; onCancel: () => void; onSaved: (user: User) => void }) {
   const [nombre, setNombre] = useState(user.nombre);
@@ -216,8 +260,8 @@ function UserEditForm({ user, onCancel, onSaved }: { user: User; onCancel: () =>
         role,
       });
       onSaved(updated);
-    } catch (error: any) {
-      setError(error.message);
+    } catch (err: any) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }

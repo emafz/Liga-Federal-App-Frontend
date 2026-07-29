@@ -1,20 +1,190 @@
+/* ============================================================
+                      LANDING PAGE STYLES
+   ============================================================ */
+.landingContainer {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  color: #ffffff;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.heroSection {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 0 60px;
+  min-height: 100vh;
+  position: relative;
+  z-index: 2;
+  gap: 40px;
+}
+
+.heroLeft {
+  flex: 1.1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 36px;
+  max-width: 600px;
+}
+
+.heroLogoWrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.heroLogo {
+  max-width: 450px;
+  width: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 18px rgba(0, 102, 255, 0.35));
+}
+
+.heroTagline {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  align-self: center;
+  align-items: center;
+  text-align: center;
+}
+
+.heroTagline span {
+  display: block;
+}
+
+.heroActions {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  align-items: center;
+}
+
+/* Botón principal: ACCESO A LA BASE (borde azul, secundario) */
+.btnWrapperBlue {
+  width: 100%;
+  max-width: 320px;
+}
+
+.btnWrapperBlue button {
+  width: 100%;
+  background: rgba(5, 17, 36, 0.6);
+  border: 1px solid var(--color-primary);
+  color: #ffffff;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  transition: transform 0.15s, background-color 0.15s;
+}
+
+.btnWrapperBlue button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: rgba(0, 102, 255, 0.2);
+  opacity: 1;
+}
+
+/* Botón secundario: CREAR CUENTA (dorado) */
+.btnWrapperGold {
+  width: 100%;
+  max-width: 320px;
+}
+
+.btnWrapperGold button {
+  width: 100%;
+  background: linear-gradient(135deg, var(--color-accent-gold) 0%, #a68128 100%);
+  color: #020712;
+  border: none;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  transition: transform 0.15s, opacity 0.15s;
+}
+
+.btnWrapperGold button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+.heroRight {
+  flex: 0.9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  align-self: stretch;
+  padding-top: 80px;
+}
+
+.charactersWrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.charactersImg {
+  max-height: 80vh;
+  max-width: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 30px rgba(0, 102, 255, 0.4));
+  animation: floatLanding 6s ease-in-out infinite;
+}
+
+@keyframes floatLanding {
+
+  0%,
+  100% {
+    transform: translateY();
+  }
+
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+/* ============================================================
+                      DASHBOARD PANEL STYLES
+   ============================================================ */
 .container {
   min-height: 100vh;
-  background-color: #0a0a0a;
-  padding: 40px;
+  padding: 40px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
 }
 
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(0, 102, 255, 0.15);
 }
 
-.header > button {
+.headerTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.dashboardLogo {
+  height: 48px;
   width: auto;
-  padding: 10px 20px;
-  margin-top: 0;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
 }
 
 .headerActions {
@@ -24,159 +194,185 @@
 
 .headerActions button {
   width: auto;
-  padding: 10px 20px;
+  padding: 10px 22px;
   margin-top: 0;
-}
-
-.title {
-  font-size: 24px;
+  font-size: 13px;
   font-weight: 700;
-  color: #ffffff;
-  margin: 0;
 }
 
-/* Mensajes de estado de la petición a la API */
+.headerActions button:first-child {
+  background: var(--color-primary);
+  border: none;
+}
+
+.headerActions button:first-child:hover {
+  background: var(--color-primary-hover);
+}
+
+.headerActions button:last-child {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.headerActions button:last-child:hover {
+  border-color: #ffffff;
+  color: #ffffff;
+}
+
 .message {
-  color: #888;
+  color: var(--color-text-muted);
   font-size: 15px;
+  padding: 20px 0;
 }
 
 .error {
-  color: #ff6b6b;
+  color: #ff5252;
   font-size: 15px;
+  padding: 20px 0;
 }
 
 /* ============================================================
-                                  TABLE
-  ============================================================ */
+                            TABLE
+   ============================================================ */
 .tableWrapper {
   overflow-x: auto;
-  border-radius: 12px;
-  border: 1px solid #222;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  background: var(--color-card-bg);
+  backdrop-filter: blur(8px);
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
-  background-color: #111;
+  text-align: left;
 }
 
 .th {
-  padding: 14px 16px;
-  text-align: left;
-  font-size: 12px;
-  font-weight: 600;
-  color: #888;
+  padding: 18px 24px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid #222;
-  background-color: #0f0f0f;
+  letter-spacing: 0.1em;
+  border-bottom: 1px solid var(--color-border);
+  background-color: rgba(2, 7, 18, 0.6);
 }
 
-.tr:not(:last-child) {
-  border-bottom: 1px solid #1a1a1a;
+.tr {
+  border-bottom: 1px solid rgba(0, 102, 255, 0.08);
+  transition: background-color 0.15s;
 }
 
 .tr:hover {
-  background-color: #161616;
+  background-color: rgba(0, 102, 255, 0.05);
 }
 
 .td {
-  padding: 14px 16px;
+  padding: 16px 24px;
   font-size: 14px;
-  color: #ccc;
+  color: #e2e8f0;
   white-space: nowrap;
 }
 
 /* ============================================================
-                                  USER CELL
-    ============================================================ */
+                          USER CELL & BADGE
+   ============================================================ */
 .userCell {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
 .avatar {
-  width: 46px;
-  height: 46px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background-color: #1a1a1a;
-  border: 1px solid #333;
+  border: 1px solid var(--color-primary);
   flex-shrink: 0;
 }
 
-/* ============================================================
-                                  BADGE
-      ============================================================ */
 .badge {
   display: inline-block;
-  padding: 3px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.badge__root {
+  background-color: rgba(194, 155, 56, 0.15);
+  border: 1px solid rgba(194, 155, 56, 0.35);
+  color: var(--color-accent-gold);
 }
 
 .badge__admin {
-  background-color: rgba(155, 93, 229, 0.15);
-  color: #b07ef8;
-}
-
-.badge__editor {
-  background-color: rgba(0, 200, 150, 0.12);
-  color: #00c896;
+  background-color: rgba(0, 102, 255, 0.15);
+  border: 1px solid rgba(0, 102, 255, 0.35);
+  color: #5599ff;
 }
 
 .badge__user {
-  background-color: rgba(255, 255, 255, 0.06);
-  color: #888;
+  background-color: rgba(0, 200, 150, 0.12);
+  border: 1px solid rgba(0, 200, 150, 0.3);
+  color: #00c896;
+}
+
+.badge__guest {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--color-text-muted);
 }
 
 /* ============================================================
-                                  ACTION BUTTONS
-        ============================================================ */
+                        ACTION BUTTONS
+   ============================================================ */
 .actions {
   display: flex;
-  gap: 8px;
+  gap: 10px;
 }
 
 .actionBtn {
   padding: 6px 14px;
-  font-size: 13px;
-  font-weight: 500;
-  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  border: 1px solid #333;
-  background-color: transparent;
-  color: #ccc;
-  transition:
-    border-color 0.15s,
-    color 0.15s;
+  border: 1px solid var(--color-border);
+  background-color: rgba(2, 7, 18, 0.4);
+  color: var(--color-text-muted);
+  transition: all 0.15s;
 }
 
 .actionBtn:hover {
-  border-color: #666;
-  color: #fff;
+  border-color: #ffffff;
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 .actionBtnEdit {
-  border-color: rgba(155, 93, 229, 0.4);
-  color: #b07ef8;
+  border-color: rgba(0, 102, 255, 0.4);
+  color: #5599ff;
 }
 
 .actionBtnEdit:hover {
-  border-color: #9b5de5;
-  color: #c49dfa;
+  border-color: var(--color-primary);
+  color: #ffffff;
+  background-color: rgba(0, 102, 255, 0.2);
 }
 
 /* ============================================================
-                                  MODAL — VER (detalle de usuario)
-  ============================================================ */
+                          MODAL VER & EDITAR
+   ============================================================ */
 .viewGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 16px 24px;
   margin: 0;
+  padding: 10px 0;
 }
 
 .viewRow {
@@ -186,37 +382,37 @@
 }
 
 .viewLabel {
-  font-size: 12px;
-  font-weight: 600;
-  color: #888;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .viewValue {
   font-size: 14px;
-  color: #eee;
+  color: #ffffff;
   margin: 0;
 }
 
-/* ============================================================
-                                  MODAL — EDITAR (formulario)
-  ============================================================ */
 .editForm {
   display: flex;
   flex-direction: column;
+  gap: 16px;
+  padding: 10px 0;
 }
 
 .formRow {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 0 16px;
+  gap: 16px;
 }
 
 .label {
-  font-size: 13px;
-  font-weight: 500;
-  color: #ccc;
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-muted);
   margin-bottom: 6px;
 }
 
@@ -224,44 +420,140 @@
 .select {
   width: 100%;
   padding: 12px 16px;
-  margin-bottom: 16px;
-  background-color: #1a1a1a;
-  border: 1px solid #333;
-  border-radius: 8px;
-  color: #fff;
+  background-color: rgba(2, 8, 18, 0.85);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: #ffffff;
   font-size: 14px;
-  box-sizing: border-box;
   outline: none;
+  transition: border-color 0.15s;
+}
+
+.select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 14px;
+}
+
+.select option {
+  background-color: #051124;
 }
 
 .input:focus,
 .select:focus {
-  border-color: #666;
+  border-color: var(--color-primary);
+  border-width: 2px;
 }
 
 .modalActions {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  margin-top: 8px;
+  margin-top: 12px;
 }
 
 .modalActions button {
   width: auto;
-  padding: 10px 20px;
+  padding: 10px 24px;
   margin-top: 0;
 }
 
 /* ============================================================
-                                  MOBILE
-  ============================================================ */
-@media (max-width: 768px) {
-  .container {
-    padding: 20px 16px;
+                          RESPONSIVE MOBILE
+   ============================================================ */
+@media (max-width: 990px) {
+  .heroSection {
+    flex-direction: column;
+    padding: 40px 30px;
+    justify-content: flex-start;
+    gap: 30px;
+    min-height: 100vh;
   }
+
+  .heroLeft {
+    flex: none;
+    max-width: 100%;
+    align-items: center;
+    text-align: center;
+    gap: 24px;
+  }
+
+  .heroLogoWrapper {
+    justify-content: center;
+  }
+
+  .heroTagline {
+    border-left: none;
+    border-top: 2px solid var(--color-accent-gold);
+    padding-left: 0;
+    padding-top: 16px;
+    align-items: center;
+    text-align: center;
+  }
+
+  .heroTagline span {
+    white-space: normal;
+  }
+
+  .heroActions {
+    max-width: 500px;
+  }
+
+  .heroRight {
+    flex: none;
+    height: auto;
+    width: 100%;
+    padding-top: 0;
+  }
+
+  .charactersImg {
+    max-height: 50vh;
+  }
+
+  .container {
+    padding: 24px 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .heroTagline {
+    font-size: 14px;
+  }
+
+  .heroLogo {
+    max-width: 280px;
+  }
+
+  .btnWrapperBlue,
+  .btnWrapperGold {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
 
   .viewGrid,
   .formRow {
     grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .headerActions {
+    width: 100%;
+  }
+
+  .headerActions button {
+    flex: 1;
+    text-align: center;
   }
 }
