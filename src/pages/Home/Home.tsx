@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import Button from "@/components/ui/Button/Button";
 import Modal from "@/components/blocks/Modal/Modal";
+import ModalMaps from "@/components/ModalMaps/ModalMaps";
 import styles from "./Home.module.css";
 import { getUsers } from "@/api/getUsers";
 import { updateUser } from "@/api/updateUser";
@@ -59,9 +60,27 @@ function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Rol del usuario logueado
+  const currentUserRole = (localStorage.getItem("role") || "").toUpperCase();
+  const isRootOrAdmin = currentUserRole === "ROOT" || currentUserRole === "ADMIN";
+
+  // Estado para la barra de búsqueda universal
+  const [searchQuery, setSearchQuery] = useState("");
+
   // Usuario seleccionado para ver o editar en el modal
   const [modalUser, setModalUser] = useState<User | null>(null);
   const [modalMode, setModalMode] = useState<"view" | "edit" | null>(null);
+
+  // Estado para el modal de Google Maps
+  const [mapModalData, setMapModalData] = useState<{
+    isOpen: boolean;
+    locationName: string;
+    fullAddress: string;
+  }>({
+    isOpen: false,
+    locationName: "",
+    fullAddress: "",
+  });
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -107,10 +126,75 @@ function Home() {
     setModalUser(null);
   }
 
+  function openMap(user: User) {
+    const locationName = user.localidad || "";
+    const addressParts = [user.direccion, user.localidad, user.provincia, "Argentina"].filter(Boolean);
+    const fullAddress = addressParts.join(", ");
+    setMapModalData({
+      isOpen: true,
+      locationName,
+      fullAddress,
+    });
+  }
+
+  function closeMap() {
+    setMapModalData((prev) => ({ ...prev, isOpen: false }));
+  }
+
   function handleUserUpdated(updated: User) {
     setUsers((prev) => prev.map((u) => (u._id === updated._id ? updated : u)));
     closeModal();
   }
+
+  // CÁLCULOS PARA TARJETAS DASHBOARD
+  const totalUsers = users.length;
+  const maleCount = users.filter(
+    (u) => u.genero?.toLowerCase().includes("masculino") || u.genero?.includes("♂")
+  ).length;
+  const femaleCount = users.filter(
+    (u) => u.genero?.toLowerCase().includes("femenino") || u.genero?.includes("♀")
+  ).length;
+
+  const rolesCount = users.reduce((acc, u) => {
+    const r = (u.role || "USER").toUpperCase();
+    acc[r] = (acc[r] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const uniqueProvincesCount = new Set(
+    users.map((u) => u.provincia?.trim()).filter(Boolean)
+  ).size;
+
+  const usersWithAge = users.filter((u) => typeof u.edad === "number" && u.edad > 0);
+  const avgAge =
+    usersWithAge.length > 0
+      ? (usersWithAge.reduce((sum, u) => sum + (u.edad || 0), 0) / usersWithAge.length).toFixed(1)
+      : "-";
+
+  // FILTRADO MULTI-CAMPO UNIVERSAL
+  const filteredUsers = users.filter((user) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase().trim();
+    const fieldsToSearch = [
+      user.nombre,
+      user.apellido,
+      user.alias,
+      user.email,
+      user.genero,
+      user.edad ? String(user.edad) : "",
+      user.fechaNacimiento,
+      user.telefono,
+      user.direccion,
+      user.localidad,
+      user.provincia,
+      user.pais,
+      user.codigoPostal,
+      user.role,
+      user.poder?.nombre,
+      user.poder?.descripcion,
+    ];
+    return fieldsToSearch.some((field) => field && String(field).toLowerCase().includes(q));
+  });
 
   // Si no está autenticado, mostramos la Landing Page pública
   if (!isAuthenticated) {
@@ -154,11 +238,50 @@ function Home() {
   // Si está autenticado, mostramos el Panel de Administración de Usuarios
   return (
     <main className={styles.container}>
+      {/* HEADER CON BARRA DE BÚSQUEDA EXCLUSIVA PARA ROOT Y ADMIN */}
       <div className={styles.header}>
         <div className={styles.headerTitleGroup}>
           <img src={logoImg} className={styles.dashboardLogo} alt="Logo" />
           <h1 className={styles.title}>Usuarios Registrados</h1>
         </div>
+
+        {isRootOrAdmin && (
+          <div className={styles.searchContainer}>
+            <div className={styles.searchInputWrapper}>
+              <svg
+                className={styles.searchIcon}
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                type="text"
+                className={styles.searchInput}
+                placeholder="Buscar por cualquier campo (nombre, alias, ciudad, rol...)"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  className={styles.clearSearchBtn}
+                  onClick={() => setSearchQuery("")}
+                  title="Limpiar búsqueda"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className={styles.headerActions}>
           <Button variant="primary" onClick={() => navigate({ to: "/create-user" })}>
             + Agregar Usuario
@@ -169,13 +292,62 @@ function Home() {
         </div>
       </div>
 
+      {/* TARJETAS RESUMEN DE DASHBOARD */}
+      {!loading && !error && users.length > 0 && (
+        <div className={styles.statsGrid}>
+          <div className={styles.statCard}>
+            <span className={styles.statLabel}>Usuarios Totales</span>
+            <h3 className={styles.statValue}>{totalUsers}</h3>
+            <span className={styles.statSubtext}>Registrados en la base</span>
+          </div>
+
+          <div className={styles.statCard}>
+            <span className={styles.statLabel}>Género</span>
+            <div className={styles.statValue}>
+              <span style={{ color: "#3b82f6", fontSize: "18px" }}>♂ {maleCount}</span>
+              <span style={{ color: "#ec4899", fontSize: "18px" }}>♀ {femaleCount}</span>
+            </div>
+            <span className={styles.statSubtext}>Distribución total</span>
+          </div>
+
+          <div className={styles.statCard}>
+            <span className={styles.statLabel}>Usuarios por Rol</span>
+            <div className={styles.statBadgeGroup}>
+              {Object.entries(rolesCount).map(([role, count]) => (
+                <span key={role} className={role === "ROOT" ? styles.miniBadgeGold : styles.miniBadge}>
+                  {role}: {count}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className={styles.statCard}>
+            <span className={styles.statLabel}>Provincias</span>
+            <h3 className={styles.statValue}>{uniqueProvincesCount}</h3>
+            <span className={styles.statSubtext}>Provincias representadas</span>
+          </div>
+
+          <div className={styles.statCard}>
+            <span className={styles.statLabel}>Edad Promedio</span>
+            <h3 className={styles.statValue}>
+              {avgAge} <span style={{ fontSize: "13px", color: "var(--color-text-muted)" }}>años</span>
+            </h3>
+            <span className={styles.statSubtext}>Promedio de usuarios</span>
+          </div>
+        </div>
+      )}
+
       {loading && <p className={styles.message}>Cargando usuarios...</p>}
 
       {error && <p className={styles.error}>{error}</p>}
 
       {!loading && !error && users.length === 0 && <p className={styles.message}>No hay usuarios para mostrar</p>}
 
-      {!loading && !error && users.length > 0 && (
+      {!loading && !error && users.length > 0 && filteredUsers.length === 0 && (
+        <p className={styles.message}>No se encontraron usuarios coincidentes con "{searchQuery}"</p>
+      )}
+
+      {!loading && !error && filteredUsers.length > 0 && (
         <div className={styles.tableWrapper}>
           <table className={styles.table}>
             <thead>
@@ -191,7 +363,7 @@ function Home() {
               </tr>
             </thead>
             <tbody>
-              {[...users]
+              {[...filteredUsers]
                 .sort((a, b) => {
                   const roleOrder: Record<string, number> = { ROOT: 1, ADMIN: 2, USER: 3, GUEST: 4 };
                   const orderA = roleOrder[a.role?.toUpperCase()] ?? 99;
@@ -217,17 +389,15 @@ function Home() {
                     <td className={styles.td}>{getGenderBadge(user.genero)}</td>
                     <td className={styles.td}>
                       {user.localidad ? (
-                        <a
-                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                            `${user.direccion || ""}, ${user.localidad}, ${user.provincia || ""}, Argentina`.trim()
-                          )}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <button
+                          type="button"
+                          onClick={() => openMap(user)}
                           className={styles.mapLink}
-                          title={`Ver dirección (${user.direccion || "sin dirección"}) en Google Maps`}
+                          style={{ background: "none", border: "none", padding: 0, cursor: "pointer", font: "inherit" }}
+                          title={`Ver mapa de ${user.localidad}`}
                         >
                           {user.localidad}
-                        </a>
+                        </button>
                       ) : (
                         "-"
                       )}
@@ -257,6 +427,13 @@ function Home() {
         {modalMode === "view" && modalUser && <UserDetails user={modalUser} />}
         {modalMode === "edit" && modalUser && <UserEditForm user={modalUser} onCancel={closeModal} onSaved={handleUserUpdated} />}
       </Modal>
+
+      <ModalMaps
+        isOpen={mapModalData.isOpen}
+        onClose={closeMap}
+        locationName={mapModalData.locationName}
+        fullAddress={mapModalData.fullAddress}
+      />
     </main>
   );
 }
