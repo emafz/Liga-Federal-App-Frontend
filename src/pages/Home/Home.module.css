@@ -752,7 +752,146 @@
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
+  .container {
+    padding: 16px 12px;
+    gap: 20px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding-bottom: 16px;
+  }
+
+  .headerTitleGroup {
+    width: 100%;
+    gap: 12px;
+  }
+
+  .dashboardLogo {
+    height: 38px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .headerActions {
+    width: 100%;
+    display: flex;
+    gap: 10px;
+  }
+
+  .headerActions button {
+    flex: 1;
+    text-align: center;
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .tableWrapper {
+    border-radius: var(--radius-lg);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .th {
+    padding: 12px 14px;
+    font-size: 10px;
+  }
+
+  .td {
+    padding: 12px 14px;
+    font-size: 13px;
+  }
+
+  /* Modal Detalle de Usuario Responsivo */
+  .userDetailsWrapper {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    max-height: none;
+    overflow-y: auto;
+  }
+
+  .userPhotoSection {
+    height: 280px;
+    max-height: 40vh;
+  }
+
+  .viewFieldsWrapper {
+    padding: 16px;
+    overflow-y: visible;
+  }
+
+  .aliasHeader {
+    font-size: 18px;
+    margin-bottom: 6px;
+  }
+
+  .viewGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  /* Modal Editar Usuario Responsivo */
+  .editFormCompact {
+    padding: 16px;
+    gap: 14px;
+    overflow-y: auto;
+  }
+
+  .editHeaderGroup {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    min-height: auto;
+    margin-bottom: 8px;
+  }
+
+  .editHeaderGroup .viewTitle {
+    position: static;
+    font-size: 16px;
+    text-align: center;
+  }
+
+  .editFormGrid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .fieldInline {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+  }
+
+  .labelInline {
+    width: 100%;
+    text-align: left;
+    font-size: 11px;
+  }
+
+  .inputCompact,
+  .selectCompact {
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+
+  .modalActions {
+    flex-direction: column-reverse;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .modalActions button,
+  .btnSaveGold {
+    width: 100% !important;
+    padding: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
   .heroTagline {
     font-size: 14px;
   }
@@ -766,28 +905,13 @@
     width: 100%;
     max-width: 100%;
   }
-}
 
-@media (max-width: 768px) {
-
-  .viewGrid,
-  .formRow {
+  .viewGrid {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 10px;
   }
 
-  .header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-  }
-
-  .headerActions {
-    width: 100%;
-  }
-
-  .headerActions button {
-    flex: 1;
-    text-align: center;
+  .userPhotoSection {
+    height: 220px;
   }
 }
