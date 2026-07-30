@@ -170,6 +170,11 @@
   transition: border-color 0.15s;
 }
 
+.input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
+
 .input::placeholder {
   color: #4b6282;
 }

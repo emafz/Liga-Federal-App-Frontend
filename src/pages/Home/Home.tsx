@@ -8,17 +8,17 @@ import { updateUser } from "@/api/updateUser";
 import type { User } from "@/api/types";
 import logoImg from "@/assets/Portadas/Logo.webp";
 import personajesImg from "@/assets/Portadas/Personajes-Home.webp";
-import defaultPhoto from "@/assets/Tarjetas/01_El_Payé.png";
-import avatarImg from "@/assets/Avatar/Avatar_01_El_Payé.png";
+import defaultPhoto from "@/assets/Tarjetas/01_El_Paye.png";
+import avatarImg from "@/assets/Avatar/Avatar_01_El_Paye.png";
 
 const ROLES = ["ROOT", "ADMIN", "USER", "GUEST"];
 
 function getGenderBadge(genero?: string) {
   const g = genero?.toLowerCase() || "";
-  if (g === "masculino") {
+  if (g.includes("masculino") || g.includes("♂")) {
     return (
       <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <svg style={{ display: "inline-block", flexShrink: 0 }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="10" cy="14" r="5" />
           <line x1="19" y1="5" x2="13.5" y2="10.5" />
           <polyline points="14 5 19 5 19 10" />
@@ -27,10 +27,10 @@ function getGenderBadge(genero?: string) {
       </span>
     );
   }
-  if (g === "femenino") {
+  if (g.includes("femenino") || g.includes("♀")) {
     return (
       <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ec4899" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <svg style={{ display: "inline-block", flexShrink: 0 }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ec4899" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="9" r="5" />
           <line x1="12" y1="14" x2="12" y2="21" />
           <line x1="9" y1="18" x2="15" y2="18" />
@@ -41,7 +41,7 @@ function getGenderBadge(genero?: string) {
   }
   return (
     <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <svg style={{ display: "inline-block", flexShrink: 0 }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="9" />
         <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
         <line x1="12" y1="17" x2="12.01" y2="17" />
@@ -66,7 +66,7 @@ function Home() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     setIsAuthenticated(!!token);
-    
+
     if (!token) {
       setLoading(false);
       return;
@@ -126,7 +126,7 @@ function Home() {
               <span>UNIDOS POR LO QUE SOMOS,</span>
               <span>IMPARABLES POR LO QUE PODEMOS SER.</span>
             </div>
-            
+
             <div className={styles.heroActions}>
               <div className={styles.btnWrapperBlue}>
                 <Button variant="secondary" onClick={() => navigate({ to: "/login" })}>
@@ -181,6 +181,7 @@ function Home() {
             <thead>
               <tr>
                 <th className={styles.th}>Usuario</th>
+                <th className={styles.th}>Alias</th>
                 <th className={styles.th}>Email</th>
                 <th className={styles.th}>Género</th>
                 <th className={styles.th}>Localidad</th>
@@ -199,33 +200,54 @@ function Home() {
                 })
                 .map((user) => (
                   <tr key={user._id} className={styles.tr}>
-                  <td className={styles.td}>
-                    <div className={styles.userCell}>
-                      <img className={styles.avatar} src={avatarImg} alt={`${user.nombre} ${user.apellido}`} />
-                      <span>
-                        {user.nombre} {user.apellido}
-                      </span>
-                    </div>
-                  </td>
-                  <td className={styles.td}>{user.email}</td>
-                  <td className={styles.td}>{getGenderBadge(user.genero)}</td>
-                  <td className={styles.td}>{user.localidad || "-"}</td>
-                  <td className={styles.td}>{user.provincia || "-"}</td>
-                  <td className={styles.td}>
-                    <span className={`${styles.badge} ${styles[`badge__${user.role.toLowerCase()}`] ?? ""}`}>{user.role}</span>
-                  </td>
-                  <td className={styles.td}>
-                    <div className={styles.actions}>
-                      <button className={styles.actionBtn} onClick={() => openView(user)}>
-                        Ver
-                      </button>
-                      <button className={`${styles.actionBtn} ${styles.actionBtnEdit}`} onClick={() => openEdit(user)}>
-                        Editar
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    <td className={styles.td}>
+                      <div className={styles.userCell}>
+                        <img
+                          className={styles.avatar}
+                          src={user.avatar?.url || avatarImg}
+                          alt={user.avatar?.alt || `${user.nombre} ${user.apellido}`}
+                        />
+                        <span>
+                          {user.nombre} {user.apellido}
+                        </span>
+                      </div>
+                    </td>
+                    <td className={styles.td} style={{ color: "#94a3b8" }}>{user.alias || "-"}</td>
+                    <td className={styles.td}>{user.email}</td>
+                    <td className={styles.td}>{getGenderBadge(user.genero)}</td>
+                    <td className={styles.td}>
+                      {user.localidad ? (
+                        <a
+                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                            `${user.direccion || ""}, ${user.localidad}, ${user.provincia || ""}, Argentina`.trim()
+                          )}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.mapLink}
+                          title={`Ver dirección (${user.direccion || "sin dirección"}) en Google Maps`}
+                        >
+                          {user.localidad}
+                        </a>
+                      ) : (
+                        "-"
+                      )}
+                    </td>
+                    <td className={styles.td}>{user.provincia || "-"}</td>
+                    <td className={styles.td}>
+                      <span className={`${styles.badge} ${styles[`badge__${user.role.toLowerCase()}`] ?? ""}`}>{user.role}</span>
+                    </td>
+                    <td className={styles.td}>
+                      <div className={styles.actions}>
+                        <button className={styles.actionBtn} onClick={() => openView(user)}>
+                          Ver
+                        </button>
+                        <button className={`${styles.actionBtn} ${styles.actionBtnEdit}`} onClick={() => openEdit(user)}>
+                          Editar
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>
@@ -293,7 +315,25 @@ function UserDetails({ user }: { user: User }) {
 
       {/* COLUMNA DERECHA: campos de datos */}
       <div className={styles.viewFieldsWrapper}>
-        <h2 className={styles.viewTitle}>Detalle de usuario</h2>
+        {/* Alias arriba de todo en dorado */}
+        <h2 className={styles.aliasHeader}>
+          {user.alias || `${user.nombre} ${user.apellido}`}
+        </h2>
+
+        {/* Sección del Poder */}
+        <div className={styles.poderSection}>
+          <div className={styles.poderTitleRow}>
+            <span className={styles.poderLabel}>PODER:</span>
+            <span className={styles.poderName}>
+              {user.poder?.nombre ? user.poder.nombre : "SIN PODER"}
+            </span>
+          </div>
+          <p className={styles.poderDesc}>
+            {user.poder?.descripcion || "Sin descripción de poder disponible."}
+          </p>
+        </div>
+
+        {/* Grid con los demás datos */}
         <dl className={styles.viewGrid}>
           {fields.map(([label, value]) => (
             <div className={styles.viewRow} key={label}>
@@ -315,6 +355,7 @@ function UserDetails({ user }: { user: User }) {
 function UserEditForm({ user, onCancel, onSaved }: { user: User; onCancel: () => void; onSaved: (user: User) => void }) {
   const [nombre, setNombre] = useState(user.nombre);
   const [apellido, setApellido] = useState(user.apellido);
+  const [alias, setAlias] = useState(user.alias || "");
   const [genero, setGenero] = useState(user.genero);
   const [edad, setEdad] = useState(String(user.edad));
   const [fechaNacimiento, setFechaNacimiento] = useState(user.fechaNacimiento?.slice(0, 10) ?? "");
@@ -324,8 +365,14 @@ function UserEditForm({ user, onCancel, onSaved }: { user: User; onCancel: () =>
   const [provincia, setProvincia] = useState(user.provincia);
   const [pais, setPais] = useState(user.pais);
   const [codigoPostal, setCodigoPostal] = useState(user.codigoPostal);
+  const [avatarUrl, setAvatarUrl] = useState(user.avatar?.url || "");
+  const [avatarAlt, setAvatarAlt] = useState(user.avatar?.alt || "");
+  const [tarjetaUrl, setTarjetaUrl] = useState(user.tarjeta?.url || "");
+  const [tarjetaAlt, setTarjetaAlt] = useState(user.tarjeta?.alt || "");
+  const [poderNombre, setPoderNombre] = useState(user.poder?.nombre || "");
+  const [poderDescripcion, setPoderDescripcion] = useState(user.poder?.descripcion || "");
   const [role, setRole] = useState(user.role);
-  const [avatarPhoto, setAvatarPhoto] = useState<string>(avatarImg);
+  const [avatarPhoto, setAvatarPhoto] = useState<string>(user.avatar?.url || avatarImg);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -345,6 +392,7 @@ function UserEditForm({ user, onCancel, onSaved }: { user: User; onCancel: () =>
       const updated = await updateUser(user._id, {
         nombre,
         apellido,
+        alias,
         genero,
         edad: Number(edad),
         fechaNacimiento,
@@ -354,6 +402,9 @@ function UserEditForm({ user, onCancel, onSaved }: { user: User; onCancel: () =>
         provincia,
         pais,
         codigoPostal,
+        avatar: { url: avatarUrl, alt: avatarAlt },
+        tarjeta: { url: tarjetaUrl, alt: tarjetaAlt },
+        poder: { nombre: poderNombre, descripcion: poderDescripcion },
         role,
       });
       onSaved(updated);
@@ -369,7 +420,7 @@ function UserEditForm({ user, onCancel, onSaved }: { user: User; onCancel: () =>
       {/* Header del formulario de edición: Título a la izquierda, Avatar al centro */}
       <div className={styles.editHeaderGroup}>
         <h2 className={styles.viewTitle} style={{ margin: 0 }}>EDITAR USUARIO</h2>
-        
+
         <div className={styles.editAvatarWrapper}>
           <img src={avatarPhoto} alt="Avatar de usuario" className={styles.editAvatarImg} />
           <label htmlFor="edit-avatar-upload" className={styles.editAvatarBtn} title="Cambiar avatar">
@@ -398,6 +449,11 @@ function UserEditForm({ user, onCancel, onSaved }: { user: User; onCancel: () =>
         <div className={styles.fieldInline}>
           <label className={styles.labelInline} htmlFor="edit-apellido">Apellido</label>
           <input className={styles.inputCompact} id="edit-apellido" type="text" value={apellido} onChange={(e) => setApellido(e.target.value)} required />
+        </div>
+
+        <div className={styles.fieldInline}>
+          <label className={styles.labelInline} htmlFor="edit-alias">Alias</label>
+          <input className={styles.inputCompact} id="edit-alias" type="text" value={alias} onChange={(e) => setAlias(e.target.value)} />
         </div>
 
         <div className={styles.fieldInline}>
@@ -443,6 +499,36 @@ function UserEditForm({ user, onCancel, onSaved }: { user: User; onCancel: () =>
         <div className={styles.fieldInline}>
           <label className={styles.labelInline} htmlFor="edit-codigoPostal">C. Postal</label>
           <input className={styles.inputCompact} id="edit-codigoPostal" type="text" value={codigoPostal} onChange={(e) => setCodigoPostal(e.target.value)} required />
+        </div>
+
+        <div className={styles.fieldInline}>
+          <label className={styles.labelInline} htmlFor="edit-avatarUrl">Avatar URL</label>
+          <input className={styles.inputCompact} id="edit-avatarUrl" type="url" value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} />
+        </div>
+
+        <div className={styles.fieldInline}>
+          <label className={styles.labelInline} htmlFor="edit-avatarAlt">Avatar Alt</label>
+          <input className={styles.inputCompact} id="edit-avatarAlt" type="text" value={avatarAlt} onChange={(e) => setAvatarAlt(e.target.value)} />
+        </div>
+
+        <div className={styles.fieldInline}>
+          <label className={styles.labelInline} htmlFor="edit-tarjetaUrl">Tarjeta URL</label>
+          <input className={styles.inputCompact} id="edit-tarjetaUrl" type="url" value={tarjetaUrl} onChange={(e) => setTarjetaUrl(e.target.value)} />
+        </div>
+
+        <div className={styles.fieldInline}>
+          <label className={styles.labelInline} htmlFor="edit-tarjetaAlt">Tarjeta Alt</label>
+          <input className={styles.inputCompact} id="edit-tarjetaAlt" type="text" value={tarjetaAlt} onChange={(e) => setTarjetaAlt(e.target.value)} />
+        </div>
+
+        <div className={styles.fieldInline}>
+          <label className={styles.labelInline} htmlFor="edit-poderNombre">Poder</label>
+          <input className={styles.inputCompact} id="edit-poderNombre" type="text" value={poderNombre} onChange={(e) => setPoderNombre(e.target.value)} />
+        </div>
+
+        <div className={styles.fieldInline}>
+          <label className={styles.labelInline} htmlFor="edit-poderDescripcion">Desc. Poder</label>
+          <input className={styles.inputCompact} id="edit-poderDescripcion" type="text" value={poderDescripcion} onChange={(e) => setPoderDescripcion(e.target.value)} />
         </div>
 
         <div className={styles.fieldInline}>

@@ -10,10 +10,17 @@ export async function createUser(
   email: string,
   password: string,
   extraData?: {
+    alias?: string;
     provincia?: string;
     telefono?: string;
     fechaNacimiento?: string;
     edad?: number;
+    avatarUrl?: string;
+    avatarAlt?: string;
+    tarjetaUrl?: string;
+    tarjetaAlt?: string;
+    poderNombre?: string;
+    poderDescripcion?: string;
   }
 ) {
   const token = localStorage.getItem("token");
@@ -27,6 +34,7 @@ export async function createUser(
     body: JSON.stringify({
       nombre,
       apellido,
+      alias: extraData?.alias || "",
       email,
       password,
       role: "USER",
@@ -39,6 +47,18 @@ export async function createUser(
       provincia: extraData?.provincia || "Sin provincia",
       pais: "Argentina",
       codigoPostal: "0000",
+      avatar: {
+        url: extraData?.avatarUrl || "",
+        alt: extraData?.avatarAlt || "",
+      },
+      tarjeta: {
+        url: extraData?.tarjetaUrl || "",
+        alt: extraData?.tarjetaAlt || "",
+      },
+      poder: {
+        nombre: extraData?.poderNombre || "",
+        descripcion: extraData?.poderDescripcion || "",
+      },
     }),
   });
 
@@ -50,3 +70,4 @@ export async function createUser(
 
   return body.data;
 }
+

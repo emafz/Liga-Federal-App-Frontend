@@ -12,7 +12,7 @@
 
 .modal {
   width: 100%;
-  max-width: 720px;
+  max-width: 840px;
   height: auto;
   max-height: calc(100vh - 40px);
   display: flex;

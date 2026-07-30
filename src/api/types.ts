@@ -3,6 +3,7 @@ export interface User {
   _id: string; // MongoDB usa _id, no id
   nombre: string;
   apellido: string;
+  alias?: string;
   email: string;
   fechaNacimiento: string;
   edad: number;
@@ -13,5 +14,18 @@ export interface User {
   provincia: string;
   pais: string;
   codigoPostal: string;
+  avatar?: {
+    url: string;
+    alt: string;
+  };
+  tarjeta?: {
+    url: string;
+    alt: string;
+  };
+  poder?: {
+    nombre: string;
+    descripcion: string;
+  };
   role: string;
 }
+

@@ -4,6 +4,7 @@ import type { User } from "@/api/types";
 // El email no se puede modificar: el backend rechaza el request si viene en el body
 export type UpdateUserPayload = Partial<Omit<User, "_id" | "email">>;
 
+
 // ------------------------------------------------------------
 // PUT /users/:id → actualiza un usuario existente
 // Es una ruta protegida: solo un admin ya logueado puede editar usuarios

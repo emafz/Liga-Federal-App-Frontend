@@ -18,12 +18,19 @@ function CreateUser() {
 
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
+  const [alias, setAlias] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [provincia, setProvincia] = useState("");
   const [telefono, setTelefono] = useState("");
   const [fechaNacimiento, setFechaNacimiento] = useState("");
-  
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [avatarAlt, setAvatarAlt] = useState("");
+  const [tarjetaUrl, setTarjetaUrl] = useState("");
+  const [tarjetaAlt, setTarjetaAlt] = useState("");
+  const [poderNombre, setPoderNombre] = useState("");
+  const [poderDescripcion, setPoderDescripcion] = useState("");
+
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -51,10 +58,17 @@ function CreateUser() {
 
     try {
       await createUser(nombre, apellido, email, password, {
+        alias,
         provincia,
         telefono,
         fechaNacimiento,
-        edad
+        edad,
+        avatarUrl,
+        avatarAlt,
+        tarjetaUrl,
+        tarjetaAlt,
+        poderNombre,
+        poderDescripcion,
       });
       navigate({ to: "/" });
     } catch (error: any) {
@@ -109,7 +123,20 @@ function CreateUser() {
                   />
                 </div>
 
-                {/* Fila 2: Email | Contraseña */}
+                {/* Fila 2: Alias (full width) */}
+                <div className={`${styles.inputGroup} ${styles.fullWidth}`}>
+                  <input
+                    className={styles.input}
+                    id="alias"
+                    name="alias"
+                    type="text"
+                    placeholder="Alias o apodo del personaje (ej: El Payé)"
+                    value={alias}
+                    onChange={(e) => setAlias(e.target.value)}
+                  />
+                </div>
+
+                {/* Fila 3: Email | Contraseña */}
                 <div className={styles.inputGroup}>
                   <input
                     className={styles.input}
@@ -136,7 +163,7 @@ function CreateUser() {
                   />
                 </div>
 
-                {/* Fila 3: Provincia | Teléfono */}
+                {/* Fila 4: Provincia | Teléfono */}
                 <div className={styles.inputGroup}>
                   <select
                     className={styles.select}
@@ -168,7 +195,7 @@ function CreateUser() {
                   />
                 </div>
 
-                {/* Fila 4: Fecha de nacimiento (con label a la izquierda) */}
+                {/* Fila 5: Fecha de nacimiento (con label a la izquierda) */}
                 <div className={`${styles.inputGroupInline} ${styles.fullWidth}`}>
                   <label className={styles.labelInline} htmlFor="fechaNacimiento">
                     Fecha de nacimiento
@@ -184,6 +211,83 @@ function CreateUser() {
                       required
                     />
                   </div>
+                </div>
+
+                {/* Fila 6: Avatar URL | Avatar Alt */}
+                <div className={styles.inputGroup}>
+                  <input
+                    className={styles.input}
+                    id="avatarUrl"
+                    name="avatarUrl"
+                    type="url"
+                    placeholder="URL del avatar (S3)"
+                    value={avatarUrl}
+                    onChange={(e) => setAvatarUrl(e.target.value)}
+                  />
+                </div>
+
+                <div className={styles.inputGroup}>
+                  <input
+                    className={styles.input}
+                    id="avatarAlt"
+                    name="avatarAlt"
+                    type="text"
+                    placeholder="Descripción del avatar (alt)"
+                    value={avatarAlt}
+                    onChange={(e) => setAvatarAlt(e.target.value)}
+                  />
+                </div>
+
+                {/* Fila 7: Tarjeta URL | Tarjeta Alt */}
+                <div className={styles.inputGroup}>
+                  <input
+                    className={styles.input}
+                    id="tarjetaUrl"
+                    name="tarjetaUrl"
+                    type="url"
+                    placeholder="URL de la tarjeta (S3)"
+                    value={tarjetaUrl}
+                    onChange={(e) => setTarjetaUrl(e.target.value)}
+                  />
+                </div>
+
+                <div className={styles.inputGroup}>
+                  <input
+                    className={styles.input}
+                    id="tarjetaAlt"
+                    name="tarjetaAlt"
+                    type="text"
+                    placeholder="Descripción de la tarjeta (alt)"
+                    value={tarjetaAlt}
+                    onChange={(e) => setTarjetaAlt(e.target.value)}
+                  />
+                </div>
+
+                {/* Fila 8: Nombre del Poder (full width) */}
+                <div className={`${styles.inputGroup} ${styles.fullWidth}`}>
+                  <input
+                    className={styles.input}
+                    id="poderNombre"
+                    name="poderNombre"
+                    type="text"
+                    placeholder="Nombre del poder especial"
+                    value={poderNombre}
+                    onChange={(e) => setPoderNombre(e.target.value)}
+                  />
+                </div>
+
+                {/* Fila 9: Descripción del Poder (full width) */}
+                <div className={`${styles.inputGroup} ${styles.fullWidth}`}>
+                  <textarea
+                    className={styles.input}
+                    id="poderDescripcion"
+                    name="poderDescripcion"
+                    placeholder="Descripción detallada del poder"
+                    value={poderDescripcion}
+                    onChange={(e) => setPoderDescripcion(e.target.value)}
+                    rows={3}
+                    style={{ resize: "vertical" }}
+                  />
                 </div>
               </div>
 
@@ -217,3 +321,4 @@ function CreateUser() {
 }
 
 export default CreateUser;
+

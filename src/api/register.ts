@@ -21,6 +21,11 @@ export async function registerUser(payload: Partial<User> & { password?: string 
       direccion: payload.direccion || "Sin dirección",
       localidad: payload.localidad || "Sin localidad",
       provincia: payload.provincia || "Sin provincia",
+      // Nuevos campos del modelo de personajes
+      alias: payload.alias || "",
+      avatar: payload.avatar || { url: "", alt: "" },
+      tarjeta: payload.tarjeta || { url: "", alt: "" },
+      poder: payload.poder || { nombre: "", descripcion: "" },
     }),
   });
 
@@ -32,3 +37,4 @@ export async function registerUser(payload: Partial<User> & { password?: string 
 
   return body.data;
 }
+
