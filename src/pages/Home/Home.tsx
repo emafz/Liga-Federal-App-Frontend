@@ -6,6 +6,7 @@ import ModalMaps from "@/components/ModalMaps/ModalMaps";
 import styles from "./Home.module.css";
 import { getUsers } from "@/api/getUsers";
 import { updateUser } from "@/api/updateUser";
+import { deleteUser } from "@/api/deleteUser";
 import type { User } from "@/api/types";
 import logoImg from "@/assets/Portadas/Logo.webp";
 import personajesImg from "@/assets/Portadas/Personajes-Home.webp";
@@ -63,6 +64,7 @@ function Home() {
   // Rol del usuario logueado
   const currentUserRole = (localStorage.getItem("role") || "").toUpperCase();
   const isRootOrAdmin = currentUserRole === "ROOT" || currentUserRole === "ADMIN";
+  const isRoot = currentUserRole === "ROOT";
 
   // Estado para la barra de búsqueda universal
   const [searchQuery, setSearchQuery] = useState("");
@@ -144,6 +146,19 @@ function Home() {
   function handleUserUpdated(updated: User) {
     setUsers((prev) => prev.map((u) => (u._id === updated._id ? updated : u)));
     closeModal();
+  }
+
+  async function handleDeleteUser(user: User) {
+    const confirmado = window.confirm(
+      `¿Estás seguro de que querés eliminar a ${user.nombre} ${user.apellido}?\nEsta acción no se puede deshacer.`
+    );
+    if (!confirmado) return;
+    try {
+      await deleteUser(user._id);
+      setUsers((prev) => prev.filter((u) => u._id !== user._id));
+    } catch (err: any) {
+      alert(`Error al eliminar: ${err.message}`);
+    }
   }
 
   // CÁLCULOS PARA TARJETAS DASHBOARD
@@ -301,21 +316,44 @@ function Home() {
             <span className={styles.statSubtext}>Registrados en la base</span>
           </div>
 
+
           <div className={styles.statCard}>
             <span className={styles.statLabel}>Género</span>
-            <div className={styles.statValue}>
-              <span style={{ color: "#3b82f6", fontSize: "18px" }}>♂ {maleCount}</span>
-              <span style={{ color: "#ec4899", fontSize: "18px" }}>♀ {femaleCount}</span>
+            {/* Columnas alineadas: número centrado sobre su barra */}
+            <div className={styles.genderDistribution}>
+              <div className={styles.genderColMale} style={{ flex: maleCount || 1 }}>
+                <span className={styles.genderCountMale}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="10" cy="14" r="5" /><line x1="19" y1="5" x2="13.5" y2="10.5" /><polyline points="14 5 19 5 19 10" />
+                  </svg>
+                  {maleCount}
+                </span>
+                <div className={styles.genderBarMale} />
+              </div>
+              <div className={styles.genderColFemale} style={{ flex: femaleCount || 1 }}>
+                <span className={styles.genderCountFemale}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="9" r="5" /><line x1="12" y1="14" x2="12" y2="21" /><line x1="9" y1="18" x2="15" y2="18" />
+                  </svg>
+                  {femaleCount}
+                </span>
+                <div className={styles.genderBarFemale} />
+              </div>
             </div>
             <span className={styles.statSubtext}>Distribución total</span>
           </div>
+
 
           <div className={styles.statCard}>
             <span className={styles.statLabel}>Usuarios por Rol</span>
             <div className={styles.statBadgeGroup}>
               {Object.entries(rolesCount).map(([role, count]) => (
-                <span key={role} className={role === "ROOT" ? styles.miniBadgeGold : styles.miniBadge}>
-                  {role}: {count}
+                <span
+                  key={role}
+                  className={`${styles.miniBadge} ${styles[`miniBadge__${role.toLowerCase()}`] ?? ""}`}
+                >
+                  <span className={styles.miniBadgeDot} />
+                  {role} <strong>{count}</strong>
                 </span>
               ))}
             </div>
@@ -348,79 +386,192 @@ function Home() {
       )}
 
       {!loading && !error && filteredUsers.length > 0 && (
-        <div className={styles.tableWrapper}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th className={styles.th}>Usuario</th>
-                <th className={styles.th}>Alias</th>
-                <th className={styles.th}>Email</th>
-                <th className={styles.th}>Género</th>
-                <th className={styles.th}>Localidad</th>
-                <th className={styles.th}>Provincia</th>
-                <th className={styles.th}>Rol</th>
-                <th className={styles.th}>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[...filteredUsers]
-                .sort((a, b) => {
-                  const roleOrder: Record<string, number> = { ROOT: 1, ADMIN: 2, USER: 3, GUEST: 4 };
-                  const orderA = roleOrder[a.role?.toUpperCase()] ?? 99;
-                  const orderB = roleOrder[b.role?.toUpperCase()] ?? 99;
-                  return orderA - orderB;
-                })
-                .map((user) => (
-                  <tr key={user._id} className={styles.tr}>
-                    <td className={styles.td}>
-                      <div className={styles.userCell}>
-                        <img
-                          className={styles.avatar}
-                          src={user.avatar?.url || avatarImg}
-                          alt={user.avatar?.alt || `${user.nombre} ${user.apellido}`}
-                        />
-                        <span>
+        <>
+          {/* VISTA TABLA (DESKTOP / PANTALLAS ANCHAS) */}
+          <div className={styles.tableWrapper}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th className={styles.th}>Usuario</th>
+                  <th className={styles.th}>Alias</th>
+                  <th className={styles.th}>Email</th>
+                  <th className={styles.th}>Género</th>
+                  <th className={styles.th}>Localidad</th>
+                  <th className={styles.th}>Rol</th>
+                  <th className={styles.th} style={{ textAlign: "right" }}>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[...filteredUsers]
+                  .sort((a, b) => {
+                    const roleOrder: Record<string, number> = { ROOT: 1, ADMIN: 2, USER: 3, GUEST: 4 };
+                    const orderA = roleOrder[a.role?.toUpperCase()] ?? 99;
+                    const orderB = roleOrder[b.role?.toUpperCase()] ?? 99;
+                    return orderA - orderB;
+                  })
+                  .map((user) => (
+                    <tr key={user._id} className={styles.tr}>
+                      <td className={styles.td}>
+                        <div className={styles.userCell}>
+                          <img
+                            className={styles.avatar}
+                            src={user.avatar?.url || avatarImg}
+                            alt={user.avatar?.alt || `${user.nombre} ${user.apellido}`}
+                          />
+                          <span className={styles.truncateText} title={`${user.nombre} ${user.apellido}`}>
+                            {user.nombre} {user.apellido}
+                          </span>
+                        </div>
+                      </td>
+                      <td className={styles.td} style={{ color: "#94a3b8" }}>
+                        <span className={styles.truncateText} title={user.alias || "-"}>
+                          {user.alias || "-"}
+                        </span>
+                      </td>
+                      <td className={styles.td}>
+                        <span className={styles.truncateText} title={user.email}>
+                          {user.email}
+                        </span>
+                      </td>
+                      <td className={styles.td}>{getGenderBadge(user.genero)}</td>
+                      <td className={styles.td}>
+                        {user.localidad ? (
+                          <button
+                            type="button"
+                            onClick={() => openMap(user)}
+                            className={styles.mapLink}
+                            style={{ background: "none", border: "none", padding: 0, cursor: "pointer", font: "inherit" }}
+                            title={`Ver mapa de ${user.localidad}`}
+                          >
+                            <span className={styles.truncateText}>{user.localidad}</span>
+                          </button>
+                        ) : (
+                          "-"
+                        )}
+                      </td>
+                      <td className={styles.td}>
+                        <span className={`${styles.badge} ${styles[`badge__${user.role.toLowerCase()}`] ?? ""}`}>{user.role}</span>
+                      </td>
+                      <td className={styles.td}>
+                        <div className={styles.actions}>
+                          <button className={styles.actionBtn} onClick={() => openView(user)}>
+                            Ver
+                          </button>
+                          <button className={`${styles.actionBtn} ${styles.actionBtnEdit}`} onClick={() => openEdit(user)}>
+                            Editar
+                          </button>
+                          {isRoot && (
+                            <button
+                              className={`${styles.actionBtn} ${styles.actionBtnDelete}`}
+                              onClick={() => handleDeleteUser(user)}
+                              title={`Eliminar a ${user.nombre} ${user.apellido}`}
+                            >
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="3 6 5 6 21 6" />
+                                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                                <path d="M10 11v6" />
+                                <path d="M14 11v6" />
+                                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* VISTA TARJETAS (MOBILE Y PANTALLAS PEQUEÑAS - EVITA SCROLL HORIZONTAL) */}
+          <div className={styles.cardsWrapper}>
+            {[...filteredUsers]
+              .sort((a, b) => {
+                const roleOrder: Record<string, number> = { ROOT: 1, ADMIN: 2, USER: 3, GUEST: 4 };
+                const orderA = roleOrder[a.role?.toUpperCase()] ?? 99;
+                const orderB = roleOrder[b.role?.toUpperCase()] ?? 99;
+                return orderA - orderB;
+              })
+              .map((user) => (
+                <div key={user._id} className={styles.userCard}>
+                  <div className={styles.userCardHeader}>
+                    <div className={styles.userCardUserGroup}>
+                      <img
+                        className={styles.avatar}
+                        src={user.avatar?.url || avatarImg}
+                        alt={user.avatar?.alt || `${user.nombre} ${user.apellido}`}
+                      />
+                      <div className={styles.userCardNames}>
+                        <span className={styles.userCardFullName}>
                           {user.nombre} {user.apellido}
                         </span>
+                        {user.alias && <span className={styles.userCardAlias}>@{user.alias}</span>}
                       </div>
-                    </td>
-                    <td className={styles.td} style={{ color: "#94a3b8" }}>{user.alias || "-"}</td>
-                    <td className={styles.td}>{user.email}</td>
-                    <td className={styles.td}>{getGenderBadge(user.genero)}</td>
-                    <td className={styles.td}>
-                      {user.localidad ? (
-                        <button
-                          type="button"
-                          onClick={() => openMap(user)}
-                          className={styles.mapLink}
-                          style={{ background: "none", border: "none", padding: 0, cursor: "pointer", font: "inherit" }}
-                          title={`Ver mapa de ${user.localidad}`}
-                        >
-                          {user.localidad}
-                        </button>
-                      ) : (
-                        "-"
-                      )}
-                    </td>
-                    <td className={styles.td}>{user.provincia || "-"}</td>
-                    <td className={styles.td}>
-                      <span className={`${styles.badge} ${styles[`badge__${user.role.toLowerCase()}`] ?? ""}`}>{user.role}</span>
-                    </td>
-                    <td className={styles.td}>
-                      <div className={styles.actions}>
-                        <button className={styles.actionBtn} onClick={() => openView(user)}>
-                          Ver
-                        </button>
-                        <button className={`${styles.actionBtn} ${styles.actionBtnEdit}`} onClick={() => openEdit(user)}>
-                          Editar
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
+                    </div>
+                    <span className={`${styles.badge} ${styles[`badge__${user.role.toLowerCase()}`] ?? ""}`}>
+                      {user.role}
+                    </span>
+                  </div>
+
+                  <div className={styles.userCardBody}>
+                    <div className={styles.userCardField}>
+                      <span className={styles.userCardLabel}>Email:</span>
+                      <span className={styles.userCardValue} title={user.email}>
+                        {user.email}
+                      </span>
+                    </div>
+                    <div className={styles.userCardField}>
+                      <span className={styles.userCardLabel}>Género:</span>
+                      <span className={styles.userCardValue}>{getGenderBadge(user.genero)}</span>
+                    </div>
+                    <div className={styles.userCardField}>
+                      <span className={styles.userCardLabel}>Ubicación:</span>
+                      <span className={styles.userCardValue}>
+                        {user.localidad ? (
+                          <button
+                            type="button"
+                            onClick={() => openMap(user)}
+                            className={styles.mapLink}
+                            style={{ background: "none", border: "none", padding: 0, cursor: "pointer", font: "inherit" }}
+                            title={`Ver mapa de ${user.localidad}`}
+                          >
+                            {user.localidad}{user.provincia ? `, ${user.provincia}` : ""}
+                          </button>
+                        ) : (
+                          user.provincia || "-"
+                        )}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className={styles.userCardFooter}>
+                    <button className={styles.userCardActionBtn} onClick={() => openView(user)}>
+                      Ver Detalle
+                    </button>
+                    <button className={`${styles.userCardActionBtn} ${styles.actionBtnEdit}`} onClick={() => openEdit(user)}>
+                      Editar
+                    </button>
+                    {isRoot && (
+                      <button
+                        className={`${styles.userCardActionBtn} ${styles.actionBtnDelete}`}
+                        onClick={() => handleDeleteUser(user)}
+                        title={`Eliminar a ${user.nombre} ${user.apellido}`}
+                        style={{ flex: "none", padding: "8px 12px" }}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="3 6 5 6 21 6" />
+                          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                          <path d="M10 11v6" />
+                          <path d="M14 11v6" />
+                          <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+          </div>
+        </>
       )}
 
       <Modal isOpen={modalMode !== null} onClose={closeModal}>
@@ -534,7 +685,6 @@ function UserEditForm({ user, onCancel, onSaved }: { user: User; onCancel: () =>
   const [apellido, setApellido] = useState(user.apellido);
   const [alias, setAlias] = useState(user.alias || "");
   const [genero, setGenero] = useState(user.genero);
-  const [edad, setEdad] = useState(String(user.edad));
   const [fechaNacimiento, setFechaNacimiento] = useState(user.fechaNacimiento?.slice(0, 10) ?? "");
   const [telefono, setTelefono] = useState(user.telefono);
   const [direccion, setDireccion] = useState(user.direccion);
@@ -542,16 +692,25 @@ function UserEditForm({ user, onCancel, onSaved }: { user: User; onCancel: () =>
   const [provincia, setProvincia] = useState(user.provincia);
   const [pais, setPais] = useState(user.pais);
   const [codigoPostal, setCodigoPostal] = useState(user.codigoPostal);
-  const [avatarUrl, setAvatarUrl] = useState(user.avatar?.url || "");
-  const [avatarAlt, setAvatarAlt] = useState(user.avatar?.alt || "");
-  const [tarjetaUrl, setTarjetaUrl] = useState(user.tarjeta?.url || "");
-  const [tarjetaAlt, setTarjetaAlt] = useState(user.tarjeta?.alt || "");
   const [poderNombre, setPoderNombre] = useState(user.poder?.nombre || "");
   const [poderDescripcion, setPoderDescripcion] = useState(user.poder?.descripcion || "");
   const [role, setRole] = useState(user.role);
   const [avatarPhoto, setAvatarPhoto] = useState<string>(user.avatar?.url || avatarImg);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  /** Calcula la edad en años completos a partir de una fecha ISO (YYYY-MM-DD) */
+  function calcularEdad(fecha: string): number {
+    if (!fecha) return 0;
+    const hoy = new Date();
+    const nac = new Date(fecha);
+    let edad = hoy.getFullYear() - nac.getFullYear();
+    const mes = hoy.getMonth() - nac.getMonth();
+    if (mes < 0 || (mes === 0 && hoy.getDate() < nac.getDate())) edad--;
+    return edad > 0 ? edad : 0;
+  }
+
+  const edadCalculada = calcularEdad(fechaNacimiento);
 
   function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -571,7 +730,7 @@ function UserEditForm({ user, onCancel, onSaved }: { user: User; onCancel: () =>
         apellido,
         alias,
         genero,
-        edad: Number(edad),
+        edad: edadCalculada,
         fechaNacimiento,
         telefono,
         direccion,
@@ -579,8 +738,8 @@ function UserEditForm({ user, onCancel, onSaved }: { user: User; onCancel: () =>
         provincia,
         pais,
         codigoPostal,
-        avatar: { url: avatarUrl, alt: avatarAlt },
-        tarjeta: { url: tarjetaUrl, alt: tarjetaAlt },
+        avatar: user.avatar,
+        tarjeta: user.tarjeta,
         poder: { nombre: poderNombre, descripcion: poderDescripcion },
         role,
       });
@@ -639,13 +798,19 @@ function UserEditForm({ user, onCancel, onSaved }: { user: User; onCancel: () =>
         </div>
 
         <div className={styles.fieldInline}>
-          <label className={styles.labelInline} htmlFor="edit-edad">Edad</label>
-          <input className={styles.inputCompact} id="edit-edad" type="number" min={1} max={120} value={edad} onChange={(e) => setEdad(e.target.value)} required />
-        </div>
-
-        <div className={styles.fieldInline}>
           <label className={styles.labelInline} htmlFor="edit-fechaNacimiento">F. Nacimiento</label>
           <input className={styles.inputCompact} id="edit-fechaNacimiento" type="date" value={fechaNacimiento} onChange={(e) => setFechaNacimiento(e.target.value)} required />
+        </div>
+
+        {/* Edad calculada automáticamente — solo lectura */}
+        <div className={styles.fieldInline}>
+          <label className={styles.labelInline}>Edad</label>
+          <div className={styles.inputCompact} style={{ display: "flex", alignItems: "center", gap: 6, color: "#94a3b8", fontStyle: "italic" }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+              <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+            </svg>
+            {edadCalculada > 0 ? `${edadCalculada} años` : "—"}
+          </div>
         </div>
 
         <div className={styles.fieldInline}>
@@ -676,26 +841,6 @@ function UserEditForm({ user, onCancel, onSaved }: { user: User; onCancel: () =>
         <div className={styles.fieldInline}>
           <label className={styles.labelInline} htmlFor="edit-codigoPostal">C. Postal</label>
           <input className={styles.inputCompact} id="edit-codigoPostal" type="text" value={codigoPostal} onChange={(e) => setCodigoPostal(e.target.value)} required />
-        </div>
-
-        <div className={styles.fieldInline}>
-          <label className={styles.labelInline} htmlFor="edit-avatarUrl">Avatar URL</label>
-          <input className={styles.inputCompact} id="edit-avatarUrl" type="url" value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} />
-        </div>
-
-        <div className={styles.fieldInline}>
-          <label className={styles.labelInline} htmlFor="edit-avatarAlt">Avatar Alt</label>
-          <input className={styles.inputCompact} id="edit-avatarAlt" type="text" value={avatarAlt} onChange={(e) => setAvatarAlt(e.target.value)} />
-        </div>
-
-        <div className={styles.fieldInline}>
-          <label className={styles.labelInline} htmlFor="edit-tarjetaUrl">Tarjeta URL</label>
-          <input className={styles.inputCompact} id="edit-tarjetaUrl" type="url" value={tarjetaUrl} onChange={(e) => setTarjetaUrl(e.target.value)} />
-        </div>
-
-        <div className={styles.fieldInline}>
-          <label className={styles.labelInline} htmlFor="edit-tarjetaAlt">Tarjeta Alt</label>
-          <input className={styles.inputCompact} id="edit-tarjetaAlt" type="text" value={tarjetaAlt} onChange={(e) => setTarjetaAlt(e.target.value)} />
         </div>
 
         <div className={styles.fieldInline}>
@@ -735,3 +880,4 @@ function UserEditForm({ user, onCancel, onSaved }: { user: User; onCancel: () =>
 }
 
 export default Home;
+

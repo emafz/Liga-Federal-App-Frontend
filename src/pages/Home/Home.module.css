@@ -355,23 +355,117 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
+/* === MINI BADGES ROL (base pill, consistente) === */
 .miniBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-size: 10px;
   font-weight: 700;
-  padding: 2px 7px;
-  border-radius: 6px;
-  background: rgba(0, 102, 255, 0.15);
-  color: #5599ff;
-  border: 1px solid rgba(0, 102, 255, 0.3);
+  padding: 4px 10px;
+  border-radius: 99px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 1px solid;
+  /* default: USER (verde) */
+  background: rgba(0, 200, 150, 0.1);
+  color: #00c896;
+  border-color: rgba(0, 200, 150, 0.35);
 }
 
-.miniBadgeGold {
-  background: rgba(194, 155, 56, 0.15);
+.miniBadge strong {
+  font-weight: 800;
+  opacity: 1;
+}
+
+.miniBadgeDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* ROOT — dorado */
+.miniBadge__root {
+  background: rgba(194, 155, 56, 0.14);
   color: var(--color-accent-gold);
-  border-color: rgba(194, 155, 56, 0.3);
+  border-color: rgba(194, 155, 56, 0.4);
+}
+
+/* ADMIN — azul */
+.miniBadge__admin {
+  background: rgba(0, 102, 255, 0.12);
+  color: #5599ff;
+  border-color: rgba(0, 102, 255, 0.35);
+}
+
+/* USER — verde (ya es el default) */
+.miniBadge__user {
+  background: rgba(0, 200, 150, 0.1);
+  color: #00c896;
+  border-color: rgba(0, 200, 150, 0.35);
+}
+
+/* GUEST — gris */
+.miniBadge__guest {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text-muted);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* === GÉNERO CARD: columnas alineadas número-barra === */
+.genderDistribution {
+  display: flex;
+  gap: 3px;
+  margin-top: 6px;
+  width: 100%;
+}
+
+.genderColMale,
+.genderColFemale {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.genderCountMale {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 20px;
+  font-weight: 800;
+  color: #3b82f6;
+}
+
+.genderCountFemale {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 20px;
+  font-weight: 800;
+  color: #ec4899;
+}
+
+.genderBarMale {
+  width: 100%;
+  height: 5px;
+  background: linear-gradient(90deg, #1d4ed8, #3b82f6);
+  border-radius: 99px 0 0 99px;
+  min-width: 4px;
+}
+
+.genderBarFemale {
+  width: 100%;
+  height: 5px;
+  background: linear-gradient(90deg, #ec4899, #f472b6);
+  border-radius: 0 99px 99px 0;
+  min-width: 4px;
 }
 
 .message {
@@ -389,22 +483,29 @@
 /* ============================================================
                             TABLE
    ============================================================ */
+/* ============================================================
+                            TABLE & CARDS
+   ============================================================ */
 .tableWrapper {
+  width: 100%;
   overflow-x: auto;
   border-radius: var(--radius-xl);
   border: 1px solid var(--color-border);
   background: var(--color-card-bg);
   backdrop-filter: blur(8px);
+  -webkit-overflow-scrolling: touch;
 }
 
 .table {
   width: 100%;
+  min-width: 780px;
+  table-layout: auto;
   border-collapse: collapse;
   text-align: left;
 }
 
 .th {
-  padding: 18px 24px;
+  padding: 16px 18px;
   font-size: 11px;
   font-weight: 700;
   color: var(--color-text-muted);
@@ -412,6 +513,7 @@
   letter-spacing: 0.1em;
   border-bottom: 1px solid var(--color-border);
   background-color: rgba(2, 7, 18, 0.6);
+  white-space: nowrap;
 }
 
 .tr {
@@ -424,9 +526,37 @@
 }
 
 .td {
-  padding: 16px 24px;
-  font-size: 14px;
+  padding: 14px 16px;
+  font-size: 13px;
   color: #e2e8f0;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+/* Columna Rol: ancho mínimo garantizado */
+.td:nth-child(6) {
+  min-width: 80px;
+  width: 1%;
+}
+
+/* Columna Acciones: ancho mínimo para los dos botones */
+.td:nth-child(7) {
+  min-width: 130px;
+  width: 1%;
+  text-align: right;
+}
+
+/* Columna Género: puede envolver su contenido */
+.td:nth-child(4) {
+  white-space: normal;
+  min-width: 110px;
+}
+
+.truncateText {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -443,17 +573,152 @@
 }
 
 /* ============================================================
+                      CARDS RESPONSIVAS (MOBILE)
+   ============================================================ */
+.cardsWrapper {
+  display: none;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+}
+
+.userCard {
+  background: var(--color-card-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.userCard:hover {
+  border-color: rgba(0, 102, 255, 0.35);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.userCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(0, 102, 255, 0.12);
+}
+
+.userCardUserGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.userCardNames {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.userCardFullName {
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.userCardAlias {
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.userCardBody {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px 16px;
+}
+
+.userCardField {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.userCardLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+.userCardValue {
+  color: #e2e8f0;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.userCardFooter {
+  display: flex;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.userCardActionBtn {
+  flex: 1;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  border: 1px solid var(--color-border);
+  background-color: rgba(2, 7, 18, 0.4);
+  color: var(--color-text-muted);
+  transition: all 0.15s;
+  text-align: center;
+}
+
+.userCardActionBtn:hover {
+  border-color: #ffffff;
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Breakpoint para ocultar Tabla y mostrar Tarjetas en Mobile / Tablet */
+@media (max-width: 900px) {
+  .tableWrapper {
+    display: none;
+  }
+  .cardsWrapper {
+    display: flex;
+  }
+}
+
+/* ============================================================
                           USER CELL & BADGE
    ============================================================ */
 .userCell {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
+  min-width: 0;
 }
 
 .avatar {
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   border: 1px solid var(--color-primary);
   object-fit: cover;
@@ -462,12 +727,14 @@
 
 .badge {
   display: inline-block;
-  padding: 4px 12px;
+  padding: 4px 10px;
   border-radius: 99px;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .badge__root {
@@ -499,11 +766,13 @@
    ============================================================ */
 .actions {
   display: flex;
-  gap: 10px;
+  justify-content: flex-end;
+  gap: 6px;
+  flex-wrap: nowrap;
 }
 
 .actionBtn {
-  padding: 6px 14px;
+  padding: 5px 13px;
   font-size: 12px;
   font-weight: 600;
   border-radius: var(--radius-md);
@@ -512,6 +781,8 @@
   background-color: rgba(2, 7, 18, 0.4);
   color: var(--color-text-muted);
   transition: all 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .actionBtn:hover {
@@ -529,6 +800,22 @@
   border-color: var(--color-primary);
   color: #ffffff;
   background-color: rgba(0, 102, 255, 0.2);
+}
+
+/* Botón Eliminar — solo visible para ROOT */
+.actionBtnDelete {
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #f87171;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 9px;
+}
+
+.actionBtnDelete:hover {
+  border-color: #ef4444;
+  color: #ffffff;
+  background-color: rgba(239, 68, 68, 0.2);
 }
 
 /* ============================================================
