@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import styles from "./CreateUser.module.css";
 import Button from "@/components/ui/Button/Button";
 import { createUser } from "@/api/createUser";
+import { uploadImage } from "@/api/uploadImage";
 import logoImg from "@/assets/Portadas/Logo.webp";
 import condorImg from "@/assets/Portadas/Condor_Register.webp";
 
@@ -26,10 +27,19 @@ function CreateUser() {
   const [fechaNacimiento, setFechaNacimiento] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [avatarAlt, setAvatarAlt] = useState("");
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+
   const [tarjetaUrl, setTarjetaUrl] = useState("");
   const [tarjetaAlt, setTarjetaAlt] = useState("");
+  const [tarjetaPreview, setTarjetaPreview] = useState<string | null>(null);
+  const [tarjetaUploading, setTarjetaUploading] = useState(false);
+
   const [poderNombre, setPoderNombre] = useState("");
   const [poderDescripcion, setPoderDescripcion] = useState("");
+
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const tarjetaInputRef = useRef<HTMLInputElement>(null);
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -39,6 +49,44 @@ function CreateUser() {
       navigate({ to: "/login" });
     }
   }, [navigate]);
+
+  async function handleAvatarSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAvatarPreview(URL.createObjectURL(file));
+    setAvatarAlt(file.name.replace(/\.[^.]+$/, ""));
+    setAvatarUploading(true);
+    setError(null);
+    try {
+      const result = await uploadImage(file, "avatar");
+      setAvatarUrl(result.url);
+    } catch (err: any) {
+      setError(`Error al subir avatar: ${err.message}`);
+      setAvatarPreview(null);
+      setAvatarUrl("");
+    } finally {
+      setAvatarUploading(false);
+    }
+  }
+
+  async function handleTarjetaSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setTarjetaPreview(URL.createObjectURL(file));
+    setTarjetaAlt(file.name.replace(/\.[^.]+$/, ""));
+    setTarjetaUploading(true);
+    setError(null);
+    try {
+      const result = await uploadImage(file, "tarjeta");
+      setTarjetaUrl(result.url);
+    } catch (err: any) {
+      setError(`Error al subir tarjeta: ${err.message}`);
+      setTarjetaPreview(null);
+      setTarjetaUrl("");
+    } finally {
+      setTarjetaUploading(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -213,54 +261,115 @@ function CreateUser() {
                   </div>
                 </div>
 
-                {/* Fila 6: Avatar URL | Avatar Alt */}
-                <div className={styles.inputGroup}>
-                  <input
-                    className={styles.input}
-                    id="avatarUrl"
-                    name="avatarUrl"
-                    type="url"
-                    placeholder="URL del avatar (S3)"
-                    value={avatarUrl}
-                    onChange={(e) => setAvatarUrl(e.target.value)}
-                  />
+                {/* Fila 6: Avatar (upload real a Cloudinary) */}
+                <div className={`${styles.inputGroup} ${styles.fullWidth}`}>
+                  <div className={styles.uploadWidget}>
+                    <div className={styles.uploadPreviewBox}>
+                      {avatarPreview ? (
+                        <img src={avatarPreview} alt="Preview avatar" className={styles.uploadPreviewImg} />
+                      ) : (
+                        <div className={styles.uploadPlaceholder}>
+                          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="3" />
+                            <circle cx="8.5" cy="8.5" r="1.5" />
+                            <polyline points="21 15 16 10 5 21" />
+                          </svg>
+                          <span>Sin avatar</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className={styles.uploadActions}>
+                      <span className={styles.uploadLabel}>Avatar del personaje</span>
+                      {avatarUrl && (
+                        <span className={styles.uploadSuccess}>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                          Subido a Cloudinary
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        className={styles.uploadBtn}
+                        onClick={() => avatarInputRef.current?.click()}
+                        disabled={avatarUploading}
+                      >
+                        {avatarUploading ? "Subiendo..." : avatarPreview ? "Cambiar Avatar" : "Cargar Avatar"}
+                      </button>
+                      <input
+                        ref={avatarInputRef}
+                        type="file"
+                        accept="image/*"
+                        className={styles.hiddenFileInput}
+                        onChange={handleAvatarSelect}
+                      />
+                      {avatarAlt && (
+                        <input
+                          className={styles.input}
+                          type="text"
+                          placeholder="Descripción del avatar (alt)"
+                          value={avatarAlt}
+                          onChange={(e) => setAvatarAlt(e.target.value)}
+                          style={{ marginTop: "6px" }}
+                        />
+                      )}
+                    </div>
+                  </div>
                 </div>
 
-                <div className={styles.inputGroup}>
-                  <input
-                    className={styles.input}
-                    id="avatarAlt"
-                    name="avatarAlt"
-                    type="text"
-                    placeholder="Descripción del avatar (alt)"
-                    value={avatarAlt}
-                    onChange={(e) => setAvatarAlt(e.target.value)}
-                  />
-                </div>
-
-                {/* Fila 7: Tarjeta URL | Tarjeta Alt */}
-                <div className={styles.inputGroup}>
-                  <input
-                    className={styles.input}
-                    id="tarjetaUrl"
-                    name="tarjetaUrl"
-                    type="url"
-                    placeholder="URL de la tarjeta (S3)"
-                    value={tarjetaUrl}
-                    onChange={(e) => setTarjetaUrl(e.target.value)}
-                  />
-                </div>
-
-                <div className={styles.inputGroup}>
-                  <input
-                    className={styles.input}
-                    id="tarjetaAlt"
-                    name="tarjetaAlt"
-                    type="text"
-                    placeholder="Descripción de la tarjeta (alt)"
-                    value={tarjetaAlt}
-                    onChange={(e) => setTarjetaAlt(e.target.value)}
-                  />
+                {/* Fila 7: Tarjeta (upload real a Cloudinary) */}
+                <div className={`${styles.inputGroup} ${styles.fullWidth}`}>
+                  <div className={styles.uploadWidget}>
+                    <div className={styles.uploadPreviewBox}>
+                      {tarjetaPreview ? (
+                        <img src={tarjetaPreview} alt="Preview tarjeta" className={styles.uploadPreviewImg} />
+                      ) : (
+                        <div className={styles.uploadPlaceholder}>
+                          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="2" y="5" width="20" height="14" rx="2" />
+                            <line x1="2" y1="10" x2="22" y2="10" />
+                          </svg>
+                          <span>Sin tarjeta</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className={styles.uploadActions}>
+                      <span className={styles.uploadLabel}>Tarjeta del personaje</span>
+                      {tarjetaUrl && (
+                        <span className={styles.uploadSuccess}>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                          Subida a Cloudinary
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        className={styles.uploadBtn}
+                        onClick={() => tarjetaInputRef.current?.click()}
+                        disabled={tarjetaUploading}
+                      >
+                        {tarjetaUploading ? "Subiendo..." : tarjetaPreview ? "Cambiar Tarjeta" : "Cargar Tarjeta"}
+                      </button>
+                      <input
+                        ref={tarjetaInputRef}
+                        type="file"
+                        accept="image/*"
+                        className={styles.hiddenFileInput}
+                        onChange={handleTarjetaSelect}
+                      />
+                      {tarjetaAlt && (
+                        <input
+                          className={styles.input}
+                          type="text"
+                          placeholder="Descripción de la tarjeta (alt)"
+                          value={tarjetaAlt}
+                          onChange={(e) => setTarjetaAlt(e.target.value)}
+                          style={{ marginTop: "6px" }}
+                        />
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Fila 8: Nombre del Poder (full width) */}

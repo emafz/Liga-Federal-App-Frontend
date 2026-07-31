@@ -986,8 +986,7 @@
 }
 
 .editHeaderGroup .viewTitle {
-  position: absolute;
-  left: 0;
+  position: static;
 }
 
 .editFormCompact {
@@ -998,12 +997,36 @@
 }
 
 .editHeaderGroup {
-  position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
-  margin-bottom: 4px;
+  justify-content: space-between;
+  margin-bottom: 8px;
   min-height: 56px;
+}
+
+.editPhotosContainer {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  flex: 1;
+}
+
+.editPhotoItem {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+.editPhotoLabel {
+  flex-shrink: 0;
+  width: 90px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: right;
 }
 
 .editAvatarWrapper {
@@ -1042,6 +1065,44 @@
 .editAvatarBtn svg {
   width: 11px;
   height: 11px;
+}
+
+.editTarjetaWrapper {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+}
+
+.editTarjetaPreview {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--color-primary);
+  background-color: rgba(2, 8, 18, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.editTarjetaImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.editTarjetaEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+}
+
+.editTarjetaEmpty span {
+  display: none;
 }
 
 .editFormGrid {
@@ -1294,10 +1355,16 @@
 
   .editHeaderGroup {
     flex-direction: column;
-    align-items: center;
-    gap: 10px;
+    align-items: stretch;
+    gap: 12px;
     min-height: auto;
     margin-bottom: 8px;
+  }
+
+  .editPhotosContainer {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    width: 100%;
   }
 
   .editHeaderGroup .viewTitle {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import Button from "@/components/ui/Button/Button";
 import Modal from "@/components/blocks/Modal/Modal";
@@ -7,6 +7,7 @@ import styles from "./Home.module.css";
 import { getUsers } from "@/api/getUsers";
 import { updateUser } from "@/api/updateUser";
 import { deleteUser } from "@/api/deleteUser";
+import { uploadImage } from "@/api/uploadImage";
 import type { User } from "@/api/types";
 import logoImg from "@/assets/Portadas/Logo.webp";
 import personajesImg from "@/assets/Portadas/Personajes-Home.webp";
@@ -593,7 +594,7 @@ function Home() {
 // Vista "Ver": detalle de usuario en modo solo lectura
 // ------------------------------------------------------------
 function UserDetails({ user }: { user: User }) {
-  const [photoUrl, setPhotoUrl] = useState<string>(defaultPhoto);
+  const photoUrl = user.tarjeta?.url || user.avatar?.url || defaultPhoto;
 
   const fields: [string, string][] = [
     ["Nombre", `${user.nombre} ${user.apellido}`],
@@ -610,14 +611,6 @@ function UserDetails({ user }: { user: User }) {
     ["Código postal", user.codigoPostal],
   ];
 
-  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setPhotoUrl(url);
-    }
-  }
-
   return (
     <div className={styles.userDetailsWrapper}>
       {/* COLUMNA IZQUIERDA: fotografía */}
@@ -625,20 +618,6 @@ function UserDetails({ user }: { user: User }) {
         <div className={styles.photoContainer}>
           <img src={photoUrl} alt="Fotografía del usuario" className={styles.userPhotoImg} />
         </div>
-        <label htmlFor="user-photo-upload" className={styles.editPhotoBtn} title="Cambiar fotografía">
-          {/* Ícono lápiz */}
-          <svg className={styles.editPhotoIcon} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-          </svg>
-        </label>
-        <input
-          id="user-photo-upload"
-          type="file"
-          accept="image/*"
-          className={styles.hiddenFileInput}
-          onChange={handleImageChange}
-        />
       </div>
 
       {/* COLUMNA DERECHA: campos de datos */}
@@ -696,6 +675,18 @@ function UserEditForm({ user, onCancel, onSaved }: { user: User; onCancel: () =>
   const [poderDescripcion, setPoderDescripcion] = useState(user.poder?.descripcion || "");
   const [role, setRole] = useState(user.role);
   const [avatarPhoto, setAvatarPhoto] = useState<string>(user.avatar?.url || avatarImg);
+  const [avatarUrl, setAvatarUrl] = useState<string>(user.avatar?.url || "");
+  const [avatarAlt, setAvatarAltState] = useState<string>(user.avatar?.alt || "");
+  const [avatarUploading, setAvatarUploading] = useState(false);
+
+  const [tarjetaPhoto, setTarjetaPhoto] = useState<string>(user.tarjeta?.url || "");
+  const [tarjetaUrl, setTarjetaUrl] = useState<string>(user.tarjeta?.url || "");
+  const [tarjetaAlt, setTarjetaAlt] = useState<string>(user.tarjeta?.alt || "");
+  const [tarjetaUploading, setTarjetaUploading] = useState(false);
+
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const tarjetaInputRef = useRef<HTMLInputElement>(null);
+
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -712,11 +703,39 @@ function UserEditForm({ user, onCancel, onSaved }: { user: User; onCancel: () =>
 
   const edadCalculada = calcularEdad(fechaNacimiento);
 
-  function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setAvatarPhoto(url);
+    if (!file) return;
+    const previewUrl = URL.createObjectURL(file);
+    setAvatarPhoto(previewUrl);
+    setAvatarUploading(true);
+    try {
+      const result = await uploadImage(file, "avatar");
+      setAvatarUrl(result.url);
+      setAvatarAltState((prev) => prev || file.name.replace(/\.[^.]+$/, ""));
+    } catch (err: any) {
+      setError(`Error al subir avatar: ${err.message}`);
+      setAvatarPhoto(user.avatar?.url || avatarImg);
+    } finally {
+      setAvatarUploading(false);
+    }
+  }
+
+  async function handleTarjetaChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const previewUrl = URL.createObjectURL(file);
+    setTarjetaPhoto(previewUrl);
+    setTarjetaUploading(true);
+    try {
+      const result = await uploadImage(file, "tarjeta");
+      setTarjetaUrl(result.url);
+      setTarjetaAlt((prev) => prev || file.name.replace(/\.[^.]+$/, ""));
+    } catch (err: any) {
+      setError(`Error al subir tarjeta: ${err.message}`);
+      setTarjetaPhoto(user.tarjeta?.url || "");
+    } finally {
+      setTarjetaUploading(false);
     }
   }
 
@@ -738,8 +757,14 @@ function UserEditForm({ user, onCancel, onSaved }: { user: User; onCancel: () =>
         provincia,
         pais,
         codigoPostal,
-        avatar: user.avatar,
-        tarjeta: user.tarjeta,
+        avatar: {
+          url: avatarUrl || user.avatar?.url || "",
+          alt: avatarAlt || user.avatar?.alt || "",
+        },
+        tarjeta: {
+          url: tarjetaUrl || user.tarjeta?.url || "",
+          alt: tarjetaAlt || user.tarjeta?.alt || "",
+        },
         poder: { nombre: poderNombre, descripcion: poderDescripcion },
         role,
       });
@@ -753,25 +778,88 @@ function UserEditForm({ user, onCancel, onSaved }: { user: User; onCancel: () =>
 
   return (
     <form className={styles.editFormCompact} onSubmit={handleSubmit}>
-      {/* Header del formulario de edición: Título a la izquierda, Avatar al centro */}
+      {/* Header del formulario de edición: Título a la izquierda, Widgets de fotos alineados */}
       <div className={styles.editHeaderGroup}>
         <h2 className={styles.viewTitle} style={{ margin: 0 }}>EDITAR USUARIO</h2>
 
-        <div className={styles.editAvatarWrapper}>
-          <img src={avatarPhoto} alt="Avatar de usuario" className={styles.editAvatarImg} />
-          <label htmlFor="edit-avatar-upload" className={styles.editAvatarBtn} title="Cambiar avatar">
-            <svg className={styles.editPhotoIcon} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-            </svg>
-          </label>
-          <input
-            id="edit-avatar-upload"
-            type="file"
-            accept="image/*"
-            className={styles.hiddenFileInput}
-            onChange={handleAvatarChange}
-          />
+        <div className={styles.editPhotosContainer}>
+          {/* Item Avatar */}
+          <div className={styles.editPhotoItem}>
+            <span className={styles.editPhotoLabel}>Avatar</span>
+            <div className={styles.editAvatarWrapper}>
+              <img src={avatarPhoto} alt="Avatar de usuario" className={styles.editAvatarImg} />
+              <label htmlFor="edit-avatar-upload" className={styles.editAvatarBtn} title="Cambiar avatar">
+                {avatarUploading ? (
+                  <span style={{ fontSize: "10px", color: "#94a3b8" }}>...</span>
+                ) : (
+                  <svg className={styles.editPhotoIcon} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                  </svg>
+                )}
+              </label>
+              <input
+                ref={avatarInputRef}
+                id="edit-avatar-upload"
+                type="file"
+                accept="image/*"
+                className={styles.hiddenFileInput}
+                onChange={handleAvatarChange}
+              />
+              {avatarUrl && avatarUrl !== (user.avatar?.url || "") && (
+                <span className={styles.uploadSuccessBadge}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Item Tarjeta */}
+          <div className={styles.editPhotoItem}>
+            <span className={styles.editPhotoLabel}>Tarjeta</span>
+            <div className={styles.editTarjetaWrapper}>
+              <div className={styles.editTarjetaPreview}>
+                {tarjetaPhoto ? (
+                  <img src={tarjetaPhoto} alt="Tarjeta del personaje" className={styles.editTarjetaImg} />
+                ) : (
+                  <div className={styles.editTarjetaEmpty}>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="2" y="5" width="20" height="14" rx="2" />
+                      <line x1="2" y1="10" x2="22" y2="10" />
+                    </svg>
+                    <span>Sin tarjeta</span>
+                  </div>
+                )}
+              </div>
+              <label htmlFor="edit-tarjeta-upload" className={styles.editAvatarBtn} title="Cambiar tarjeta">
+                {tarjetaUploading ? (
+                  <span style={{ fontSize: "10px", color: "#94a3b8" }}>...</span>
+                ) : (
+                  <svg className={styles.editPhotoIcon} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                  </svg>
+                )}
+              </label>
+              <input
+                ref={tarjetaInputRef}
+                id="edit-tarjeta-upload"
+                type="file"
+                accept="image/*"
+                className={styles.hiddenFileInput}
+                onChange={handleTarjetaChange}
+              />
+              {tarjetaUrl && tarjetaUrl !== (user.tarjeta?.url || "") && (
+                <span className={styles.uploadSuccessBadge}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </span>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
